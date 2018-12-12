@@ -6,19 +6,26 @@ import org.json.JSONObject;
 import java.util.Iterator;
 
 public class PaymentMethodNonceFactory {
-    public static PaymentMethodNonce fromString(String jsonString) throws JSONException {
-        JSONObject json = new JSONObject(jsonString);
-        Iterator<String> keys = json.keys();
+    public static JSONObject extractPaymentMethodToken(String paymentDataString) throws JSONException {
+        return new JSONObject(new JSONObject(paymentDataString)
+                        .getJSONObject("paymentMethodData")
+                        .getJSONObject("tokenizationData")
+                        .getString("token"));
+    }
+
+    public static PaymentMethodNonce fromString(String paymentDataString) throws JSONException {
+        JSONObject token = extractPaymentMethodToken(paymentDataString);
+        Iterator<String> keys = token.keys();
 
         while (keys.hasNext()) {
             String key = keys.next();
 
             switch (key) {
                 case GooglePaymentCardNonce.API_RESOURCE_KEY:
-                    return GooglePaymentCardNonce.fromJson(jsonString);
+                    return GooglePaymentCardNonce.fromJson(paymentDataString);
 
                 case PayPalAccountNonce.API_RESOURCE_KEY:
-                    return PayPalAccountNonce.fromJson(jsonString);
+                    return PayPalAccountNonce.fromJson(token.toString());
             }
         }
 

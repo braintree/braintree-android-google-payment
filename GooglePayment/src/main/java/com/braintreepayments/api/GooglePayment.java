@@ -219,12 +219,7 @@ public class GooglePayment {
      */
     public static void tokenize(BraintreeFragment fragment, PaymentData paymentData) {
         try {
-            String token = new JSONObject(paymentData.toJson())
-                    .getJSONObject("paymentMethodData")
-                    .getJSONObject("tokenizationData")
-                    .getString("token");
-
-            fragment.postCallback(PaymentMethodNonceFactory.fromString(token));
+            fragment.postCallback(PaymentMethodNonceFactory.fromString(paymentData.toJson()));
             fragment.sendAnalyticsEvent("google-payment.nonce-received");
         } catch (JSONException | NullPointerException e) {
             fragment.sendAnalyticsEvent("google-payment.failed");

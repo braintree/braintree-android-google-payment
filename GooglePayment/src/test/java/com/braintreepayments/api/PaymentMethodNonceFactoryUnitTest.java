@@ -6,7 +6,6 @@ import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.braintreepayments.api.models.PaymentMethodNonceFactory;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -19,7 +18,7 @@ public class PaymentMethodNonceFactoryUnitTest {
 
     @Test
     public void getPaymentMethodNonce_returnsGooglePayment() throws JSONException {
-        String jsonString = stringFromFixture("payment_methods/android_pay_card_response.json");
+        String jsonString = stringFromFixture("payment_methods/google_pay_card_response.json");
 
         PaymentMethodNonce nonce = PaymentMethodNonceFactory.fromString(jsonString);
 
