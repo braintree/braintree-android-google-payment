@@ -38,8 +38,6 @@ public class GooglePaymentCardNonceUnitTest {
         assertEquals("11", googlePaymentCardNonce.getLastTwo());
         assertEquals("1234", googlePaymentCardNonce.getLastFour());
         assertEquals("android-user@example.com", googlePaymentCardNonce.getEmail());
-        assertNull(googlePaymentCardNonce.getBillingAddress());
-        assertNull(googlePaymentCardNonce.getShippingAddress());
         assertPostalAddress(billingPostalAddress, googlePaymentCardNonce.getBillingPostalAddress());
         assertPostalAddress(shippingPostalAddress, googlePaymentCardNonce.getShippingPostalAddress());
     }
@@ -114,8 +112,6 @@ public class GooglePaymentCardNonceUnitTest {
         assertEquals("11", parceled.getLastTwo());
         assertEquals("1234", parceled.getLastFour());
         assertEquals("android-user@example.com", parceled.getEmail());
-        assertNull(parceled.getBillingAddress());
-        assertNull(parceled.getShippingAddress());
         assertPostalAddress(billingPostalAddress, parceled.getBillingPostalAddress());
         assertPostalAddress(shippingPostalAddress, parceled.getShippingPostalAddress());
 

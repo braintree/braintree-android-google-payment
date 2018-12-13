@@ -5,7 +5,6 @@ import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import com.braintreepayments.api.Json;
-import com.google.android.gms.identity.intents.model.UserAddress;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,8 +28,6 @@ public class GooglePaymentCardNonce extends PaymentMethodNonce implements Parcel
     private String mLastTwo;
     private String mLastFour;
     private String mEmail;
-    private UserAddress mBillingAddress = null;
-    private UserAddress mShippingAddress = null;
     private PostalAddress mBillingPostalAddress;
     private PostalAddress mShippingPostalAddress;
     private BinData mBinData;
@@ -143,26 +140,6 @@ public class GooglePaymentCardNonce extends PaymentMethodNonce implements Parcel
 
     /**
      * @return The user's billing address.
-     * @deprecated Use getBillingPostalAddress
-     */
-    @Nullable
-    @Deprecated
-    public UserAddress getBillingAddress() {
-        return mBillingAddress;
-    }
-
-    /**
-     * @return The user's shipping address.
-     * @deprecated Use getShippingPostalAddress()
-     */
-    @Nullable
-    @Deprecated
-    public UserAddress getShippingAddress() {
-        return mShippingAddress;
-    }
-
-    /**
-     * @return The user's billing address.
      */
     @Nullable
     public PostalAddress getBillingPostalAddress() {
@@ -199,8 +176,6 @@ public class GooglePaymentCardNonce extends PaymentMethodNonce implements Parcel
         dest.writeString(mLastTwo);
         dest.writeString(mLastFour);
         dest.writeString(mEmail);
-        dest.writeParcelable(mBillingAddress, flags);
-        dest.writeParcelable(mShippingAddress, flags);
         dest.writeParcelable(mBillingPostalAddress, flags);
         dest.writeParcelable(mShippingPostalAddress, flags);
         dest.writeParcelable(mBinData, flags);
@@ -212,8 +187,6 @@ public class GooglePaymentCardNonce extends PaymentMethodNonce implements Parcel
         mLastTwo = in.readString();
         mLastFour = in.readString();
         mEmail = in.readString();
-        mBillingAddress = in.readParcelable(UserAddress.class.getClassLoader());
-        mShippingAddress = in.readParcelable(UserAddress.class.getClassLoader());
         mBillingPostalAddress = in.readParcelable(PostalAddress.class.getClassLoader());
         mShippingPostalAddress = in.readParcelable(PostalAddress.class.getClassLoader());
         mBinData = in.readParcelable(BinData.class.getClassLoader());
