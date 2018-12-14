@@ -38,8 +38,8 @@ public class GooglePaymentCardNonceUnitTest {
         assertEquals("11", googlePaymentCardNonce.getLastTwo());
         assertEquals("1234", googlePaymentCardNonce.getLastFour());
         assertEquals("android-user@example.com", googlePaymentCardNonce.getEmail());
-        assertPostalAddress(billingPostalAddress, googlePaymentCardNonce.getBillingPostalAddress());
-        assertPostalAddress(shippingPostalAddress, googlePaymentCardNonce.getShippingPostalAddress());
+        assertPostalAddress(billingPostalAddress, googlePaymentCardNonce.getBillingAddress());
+        assertPostalAddress(shippingPostalAddress, googlePaymentCardNonce.getShippingAddress());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class GooglePaymentCardNonceUnitTest {
 
         GooglePaymentCardNonce googlePaymentCardNonce = GooglePaymentCardNonce.fromJson(response);
 
-        assertPostalAddress(billingPostalAddress, googlePaymentCardNonce.getBillingPostalAddress());
+        assertPostalAddress(billingPostalAddress, googlePaymentCardNonce.getBillingAddress());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class GooglePaymentCardNonceUnitTest {
 
         GooglePaymentCardNonce googlePaymentCardNonce = GooglePaymentCardNonce.fromJson(response);
 
-        assertPostalAddress(shippingPostalAddress, googlePaymentCardNonce.getShippingPostalAddress());
+        assertPostalAddress(shippingPostalAddress, googlePaymentCardNonce.getShippingAddress());
     }
 
     @Test
@@ -112,8 +112,8 @@ public class GooglePaymentCardNonceUnitTest {
         assertEquals("11", parceled.getLastTwo());
         assertEquals("1234", parceled.getLastFour());
         assertEquals("android-user@example.com", parceled.getEmail());
-        assertPostalAddress(billingPostalAddress, parceled.getBillingPostalAddress());
-        assertPostalAddress(shippingPostalAddress, parceled.getShippingPostalAddress());
+        assertPostalAddress(billingPostalAddress, parceled.getBillingAddress());
+        assertPostalAddress(shippingPostalAddress, parceled.getShippingAddress());
 
         assertBinDataEqual(googlePaymentCardNonce.getBinData(), parceled.getBinData());
     }

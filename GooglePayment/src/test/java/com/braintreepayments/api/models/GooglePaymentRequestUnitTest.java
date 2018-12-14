@@ -45,8 +45,7 @@ public class GooglePaymentRequestUnitTest {
                 .transactionInfo(transactionInfo)
                 .environment("production")
                 .googleMerchantId("google-merchant-id")
-                .googleMerchantName("google-merchant-name")
-                .uiRequired(true);
+                .googleMerchantName("google-merchant-name");
 
         assertEquals(true, request.getAllowPrepaidCards().booleanValue());
         assertEquals(WalletConstants.BILLING_ADDRESS_FORMAT_FULL, request.getBillingAddressFormat().intValue());
@@ -56,7 +55,6 @@ public class GooglePaymentRequestUnitTest {
         assertEquals(true, request.isShippingAddressRequired().booleanValue());
         assertEquals(shippingAddressRequirements, request.getShippingAddressRequirements());
         assertEquals(transactionInfo, request.getTransactionInfo());
-        assertEquals(true, request.isUiRequired().booleanValue());
         assertEquals("PRODUCTION", request.getEnvironment());
         assertEquals("google-merchant-id", request.getGoogleMerchantId());
         assertEquals("google-merchant-name", request.getGoogleMerchantName());
@@ -74,7 +72,6 @@ public class GooglePaymentRequestUnitTest {
         assertNull(request.isShippingAddressRequired());
         assertNull(request.getShippingAddressRequirements());
         assertNull(request.getTransactionInfo());
-        assertNull(request.isUiRequired());
         assertNull(request.getEnvironment());
         assertNull(request.getEnvironment());
         assertNull(request.getGoogleMerchantId());
@@ -104,7 +101,6 @@ public class GooglePaymentRequestUnitTest {
 
         request.shippingAddressRequirements(requirements);
         request.allowPrepaidCards(true);
-        request.uiRequired(true);
         request.environment("production");
 
         Parcel parcel = Parcel.obtain();
@@ -123,7 +119,6 @@ public class GooglePaymentRequestUnitTest {
         assertEquals(WalletConstants.BILLING_ADDRESS_FORMAT_FULL, (int) parceled.getBillingAddressFormat());
         assertTrue(parceled.getShippingAddressRequirements().getAllowedCountryCodes().contains("US"));
         assertTrue(parceled.getAllowPrepaidCards());
-        assertTrue(parceled.isUiRequired());
         assertEquals("PRODUCTION", parceled.getEnvironment());
     }
 
@@ -162,7 +157,6 @@ public class GooglePaymentRequestUnitTest {
         assertEquals(WalletConstants.BILLING_ADDRESS_FORMAT_FULL, (int) parceled.getBillingAddressFormat());
         assertTrue(parceled.getShippingAddressRequirements().getAllowedCountryCodes().contains("US"));
         assertNull(parceled.getAllowPrepaidCards());
-        assertNull(parceled.isUiRequired());
         assertNull(parceled.getEnvironment());
         assertNull(parceled.getGoogleMerchantId());
         assertNull(parceled.getGoogleMerchantName());

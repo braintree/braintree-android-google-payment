@@ -28,8 +28,8 @@ public class GooglePaymentCardNonce extends PaymentMethodNonce implements Parcel
     private String mLastTwo;
     private String mLastFour;
     private String mEmail;
-    private PostalAddress mBillingPostalAddress;
-    private PostalAddress mShippingPostalAddress;
+    private PostalAddress mBillingAddress;
+    private PostalAddress mShippingAddress;
     private BinData mBinData;
 
     /**
@@ -73,8 +73,8 @@ public class GooglePaymentCardNonce extends PaymentMethodNonce implements Parcel
                 .getJSONObject("paymentMethodData")
                 .get("description").toString();
         mEmail = Json.optString(json, "email", "");
-        mBillingPostalAddress = postalAddressFromJson(billingAddressJson);
-        mShippingPostalAddress = postalAddressFromJson(shippingAddressJson);
+        mBillingAddress = postalAddressFromJson(billingAddressJson);
+        mShippingAddress = postalAddressFromJson(shippingAddressJson);
 
         mBinData = BinData.fromJson(json.optJSONObject(BIN_DATA_KEY));
         mLastTwo = details.getString(LAST_TWO_KEY);
@@ -142,16 +142,16 @@ public class GooglePaymentCardNonce extends PaymentMethodNonce implements Parcel
      * @return The user's billing address.
      */
     @Nullable
-    public PostalAddress getBillingPostalAddress() {
-        return mBillingPostalAddress;
+    public PostalAddress getBillingAddress() {
+        return mBillingAddress;
     }
 
     /**
      * @return The user's shipping address.
      */
     @Nullable
-    public PostalAddress getShippingPostalAddress() {
-        return mShippingPostalAddress;
+    public PostalAddress getShippingAddress() {
+        return mShippingAddress;
     }
 
     /**
@@ -176,8 +176,8 @@ public class GooglePaymentCardNonce extends PaymentMethodNonce implements Parcel
         dest.writeString(mLastTwo);
         dest.writeString(mLastFour);
         dest.writeString(mEmail);
-        dest.writeParcelable(mBillingPostalAddress, flags);
-        dest.writeParcelable(mShippingPostalAddress, flags);
+        dest.writeParcelable(mBillingAddress, flags);
+        dest.writeParcelable(mShippingAddress, flags);
         dest.writeParcelable(mBinData, flags);
     }
 
@@ -187,8 +187,8 @@ public class GooglePaymentCardNonce extends PaymentMethodNonce implements Parcel
         mLastTwo = in.readString();
         mLastFour = in.readString();
         mEmail = in.readString();
-        mBillingPostalAddress = in.readParcelable(PostalAddress.class.getClassLoader());
-        mShippingPostalAddress = in.readParcelable(PostalAddress.class.getClassLoader());
+        mBillingAddress = in.readParcelable(PostalAddress.class.getClassLoader());
+        mShippingAddress = in.readParcelable(PostalAddress.class.getClassLoader());
         mBinData = in.readParcelable(BinData.class.getClassLoader());
     }
 

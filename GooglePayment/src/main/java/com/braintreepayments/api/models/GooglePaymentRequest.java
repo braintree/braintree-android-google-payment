@@ -33,7 +33,6 @@ public class GooglePaymentRequest implements Parcelable {
     private Boolean mShippingAddressRequired = null;
     private ShippingAddressRequirements mShippingAddressRequirements;
     private Boolean mAllowPrepaidCards = null;
-    private Boolean mUiRequired = null;
     private boolean mPayPalEnabled = true;
     private HashMap<String, JSONObject> mAllowedPaymentMethods = new HashMap<>();
     private HashMap<String, JSONObject> mTokenizationSpecifications = new HashMap<>();
@@ -134,25 +133,6 @@ public class GooglePaymentRequest implements Parcelable {
      */
     public GooglePaymentRequest allowPrepaidCards(boolean allowPrepaidCards) {
         mAllowPrepaidCards = allowPrepaidCards;
-        return this;
-    }
-
-    /**
-     * Deprecated.
-     *
-     * When this is set to false,
-     * {@link GooglePayment#requestPayment(BraintreeFragment, GooglePaymentRequest)}
-     * will attempt to skip the UI and directly return the data from the buyer's previous selection. The merchant must
-     * be whitelisted for not showing UI. Please contact Google if you think your use case would benefit from skipping UI.
-     *
-     * Optional.
-     *
-     * @param uiRequired {@code false} if the UI should not be shown, {@code true} otherwise.
-     * @return {@link GooglePaymentRequest}
-     */
-    @Deprecated
-    public GooglePaymentRequest uiRequired(boolean uiRequired) {
-        mUiRequired = uiRequired;
         return this;
     }
 
@@ -402,12 +382,6 @@ public class GooglePaymentRequest implements Parcelable {
         return mAllowPrepaidCards;
     }
 
-    @Deprecated
-    @Nullable
-    public Boolean isUiRequired() {
-        return mUiRequired;
-    }
-
     public Boolean isPayPalEnabled() {
         return mPayPalEnabled;
     }
@@ -460,7 +434,6 @@ public class GooglePaymentRequest implements Parcelable {
         dest.writeByte((byte) (mShippingAddressRequired == null ? 0 : mShippingAddressRequired ? 1 : 2));
         dest.writeParcelable(mShippingAddressRequirements, flags);
         dest.writeByte((byte) (mAllowPrepaidCards == null ? 0 : mAllowPrepaidCards ? 1 : 2));
-        dest.writeByte((byte) (mUiRequired == null ? 0 : mUiRequired ? 1 : 2));
         dest.writeString(mEnvironment);
         dest.writeString(mGoogleMerchantId);
         dest.writeString(mGoogleMerchantName);
@@ -484,8 +457,6 @@ public class GooglePaymentRequest implements Parcelable {
         mShippingAddressRequirements = in.readParcelable(ShippingAddressRequirements.class.getClassLoader());
         byte allowPrepaidCards = in.readByte();
         mAllowPrepaidCards = allowPrepaidCards == 0 ? null : allowPrepaidCards == 1;
-        byte uiRequired = in.readByte();
-        mUiRequired = uiRequired == 0 ? null : uiRequired == 1;
         mEnvironment = in.readString();
         mGoogleMerchantId = in.readString();
         mGoogleMerchantName = in.readString();
