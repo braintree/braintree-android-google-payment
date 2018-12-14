@@ -225,7 +225,11 @@ public class GooglePayment {
             fragment.sendAnalyticsEvent("google-payment.failed");
 
             try {
-                fragment.postCallback(ErrorWithResponse.fromJson(paymentData.getPaymentMethodToken().getToken()));
+                String token = new JSONObject(paymentData.toJson())
+                        .getJSONObject("paymentMethodData")
+                        .getJSONObject("tokenizationData")
+                        .getString("token");
+                fragment.postCallback(ErrorWithResponse.fromJson(token));
             } catch (JSONException | NullPointerException e1) {
                 fragment.postCallback(e1);
             }

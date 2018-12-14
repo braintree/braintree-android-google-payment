@@ -137,7 +137,8 @@ public class GooglePaymentUnitTest {
 
     @Test
     public void tokenize_withPayPalToken_returnsPayPalAccountNonce() {
-        String paymentDataJson = FixturesHelper.stringFromFixture("response/google_payment/paypal_account.json");
+        String paymentDataJson = FixturesHelper.stringFromFixture("payment_methods/paypal_account_response.json");
+
         BraintreeFragment fragment = getSetupFragment();
         PaymentData pd = PaymentData.fromJson(paymentDataJson);
 
