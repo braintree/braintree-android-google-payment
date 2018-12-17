@@ -49,6 +49,7 @@ end
 task :release_braintree_google_payment do
   sh "./gradlew clean :GooglePayment:uploadArchives"
   sh "./gradlew closeAndReleaseRepository"
+  puts "Sleeping for 600 seconds"
   sleep 600
   puts "Braintree google pay module have been released"
 end
