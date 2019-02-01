@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.braintreepayments.api.exceptions.BraintreeException;
 import com.braintreepayments.api.exceptions.ErrorWithResponse;
@@ -499,21 +500,26 @@ public class GooglePayment {
                     buildCardPaymentMethodParameters(request, fragment));
         }
 
-        if (request.isPayPalEnabled() &&
-                configuration.isPayPalEnabled() &&
-                request.getAllowedPaymentMethod("PAYPAL") == null) {
-            request.setAllowedPaymentMethod(PAYPAL_PAYMENT_TYPE,
-                    buildPayPalPaymentMethodParameters(fragment));
-        }
-
         if (request.getTokenizationSpecificationForType(CARD_PAYMENT_TYPE) == null) {
             request.setTokenizationSpecificationForType("CARD",
                     buildCardTokenizationSpecification(fragment));
         }
 
-        if (request.getTokenizationSpecificationForType(PAYPAL_PAYMENT_TYPE) == null) {
-            request.setTokenizationSpecificationForType("PAYPAL",
-                    buildPayPalTokenizationSpecification(fragment));
+        boolean googlePaymentCanProcessPayPal = request.isPayPalEnabled() &&
+                configuration.isPayPalEnabled() &&
+                !TextUtils.isEmpty(configuration.getPayPal().getClientId());
+
+        if (googlePaymentCanProcessPayPal) {
+            if (request.getAllowedPaymentMethod("PAYPAL") == null) {
+                request.setAllowedPaymentMethod(PAYPAL_PAYMENT_TYPE,
+                        buildPayPalPaymentMethodParameters(fragment));
+            }
+
+
+            if (request.getTokenizationSpecificationForType(PAYPAL_PAYMENT_TYPE) == null) {
+                request.setTokenizationSpecificationForType("PAYPAL",
+                        buildPayPalTokenizationSpecification(fragment));
+            }
         }
 
         request.environment(configuration.getAndroidPay().getEnvironment());
