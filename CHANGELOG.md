@@ -1,5 +1,10 @@
 # Braintree Android Google Pay SDK Release Notes
 
+## 3.0.0
+
+* Convert to AndroidX
+* Replace AndroidPayConfiguration with GooglePaymentConfiguration
+
 ## 2.0.1
 
 * Disable PayPal payment method in Google Payment when the merchant is not able to process PayPal
