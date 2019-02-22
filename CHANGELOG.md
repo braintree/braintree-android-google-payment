@@ -1,5 +1,9 @@
 # Braintree Android Google Pay SDK Release Notes
 
+## Unreleased
+
+* Resolve issue where optional shipping parameters were treated as if they were required
+
 ## 3.0.0
 
 * Convert to AndroidX
