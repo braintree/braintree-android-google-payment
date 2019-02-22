@@ -1,5 +1,9 @@
 # Braintree Android Google Pay SDK Release Notes
 
+## 2.0.2
+
+* Resolve issue where optional shipping parameters were treated as if they were required
+
 ## 2.0.1
 
 * Disable PayPal payment method in Google Payment when the merchant is not able to process PayPal
