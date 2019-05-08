@@ -31,6 +31,7 @@ import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_ENVIRONMENT;
 import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_PAYMENT_DATA_REQUEST;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -245,6 +246,8 @@ public class GooglePaymentUnitTest {
         assertEquals(1, allowedPaymentMethods.length());
         assertEquals("CARD", allowedPaymentMethods.getJSONObject(0)
                 .getString("type"));
+
+        assertFalse(allowedPaymentMethods.toString().contains("paypal-client-id-for-google-payment"));
     }
 
     @Test
