@@ -25,9 +25,9 @@ allprojects {
     }
 }
 
-version = '3.0.1'
+version = '3.0.2-SNAPSHOT'
 ext {
-  versionCode = 5
+  versionCode = 6
   versionName = version
 }
 
