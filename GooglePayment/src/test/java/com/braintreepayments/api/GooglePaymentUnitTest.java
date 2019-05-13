@@ -31,6 +31,7 @@ import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_ENVIRONMENT;
 import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_PAYMENT_DATA_REQUEST;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -135,7 +136,6 @@ public class GooglePaymentUnitTest {
         JSONArray allowedPaymentMethods = getPaymentDataRequestJsonSentToGooglePayment(fragment)
                 .getJSONArray("allowedPaymentMethods");
 
-
         assertEquals(2, allowedPaymentMethods.length());
         assertEquals("PAYPAL", allowedPaymentMethods.getJSONObject(0)
                 .getString("type"));
@@ -161,11 +161,12 @@ public class GooglePaymentUnitTest {
     }
 
     @Test
-    public void requestPayment_whenPayPalDisabledInConfiguration_tokenizationPropertiesLackPayPal() throws JSONException {
+    public void requestPayment_whenPayPalDisabledInConfigurationAndGooglePayHasPayPalClientId_tokenizationPropertiesContainPayPal() throws JSONException {
         TestConfigurationBuilder configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .paypalClientId("paypal-client-id-for-google-payment")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
                 .paypalEnabled(false)
                 .paypal(new TestConfigurationBuilder.TestPayPalConfigurationBuilder(false))
@@ -180,19 +181,57 @@ public class GooglePaymentUnitTest {
         JSONArray allowedPaymentMethods = getPaymentDataRequestJsonSentToGooglePayment(fragment)
                 .getJSONArray("allowedPaymentMethods");
 
-        assertEquals(1, allowedPaymentMethods.length());
-        assertEquals("CARD", allowedPaymentMethods.getJSONObject(0)
+        assertEquals(2, allowedPaymentMethods.length());
+        assertEquals("PAYPAL", allowedPaymentMethods.getJSONObject(0)
+                .getString("type"));
+        assertEquals("CARD", allowedPaymentMethods.getJSONObject(1)
                 .getString("type"));
     }
 
     @Test
-    public void requestPayment_whenPayPalConfigurationLacksClientId_tokenizationPropertiesLackPayPal() throws JSONException {
+    public void requestPayment_usesGooglePaymentConfigurationClientId() throws JSONException {
+         TestConfigurationBuilder configuration = new TestConfigurationBuilder()
+                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                        .environment("sandbox")
+                        .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .paypalClientId("paypal-client-id-for-google-payment")
+                        .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
+                 .paypal(new TestConfigurationBuilder.TestPayPalConfigurationBuilder(true)
+                         .clientId("paypal-client-id-for-paypal"))
+                .withAnalytics();
+
+        BraintreeFragment fragment = getSetupFragment(configuration);
+        GooglePaymentRequest googlePaymentRequest = mBaseRequest
+                .googleMerchantName("google-merchant-name-override");
+
+        GooglePayment.requestPayment(fragment, googlePaymentRequest);
+
+        JSONArray allowedPaymentMethods = getPaymentDataRequestJsonSentToGooglePayment(fragment)
+                .getJSONArray("allowedPaymentMethods");
+
+        JSONObject paypal = allowedPaymentMethods.getJSONObject(0);
+
+        assertEquals("paypal-client-id-for-google-payment",
+                paypal.getJSONObject("parameters")
+                        .getJSONObject("purchase_context")
+                        .getJSONArray("purchase_units")
+                        .getJSONObject(0)
+                        .getJSONObject("payee")
+                        .getString("client_id"));
+
+        assertEquals("paypal-client-id-for-google-payment",
+                paypal.getJSONObject("tokenizationSpecification")
+                        .getJSONObject("parameters")
+                        .getString("braintree:paypalClientId"));
+    }
+
+    @Test
+    public void requestPayment_whenGooglePaymentConfigurationLacksClientId_tokenizationPropertiesLackPayPal() throws JSONException {
         TestConfigurationBuilder configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
-                .paypal(new TestConfigurationBuilder.TestPayPalConfigurationBuilder(true))
                 .withAnalytics();
 
         BraintreeFragment fragment = getSetupFragment(configuration);
@@ -207,6 +246,8 @@ public class GooglePaymentUnitTest {
         assertEquals(1, allowedPaymentMethods.length());
         assertEquals("CARD", allowedPaymentMethods.getJSONObject(0)
                 .getString("type"));
+
+        assertFalse(allowedPaymentMethods.toString().contains("paypal-client-id-for-google-payment"));
     }
 
     @Test
@@ -247,9 +288,8 @@ public class GooglePaymentUnitTest {
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment(environment)
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .paypalClientId("paypal-client-id-for-google-payment")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
-                .paypal(new TestConfigurationBuilder.TestPayPalConfigurationBuilder(true)
-                        .clientId("paypal-client-id"))
                 .withAnalytics()
                 .build();
 

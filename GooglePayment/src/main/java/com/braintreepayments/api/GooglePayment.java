@@ -385,7 +385,7 @@ public class GooglePayment {
                     .put("purchase_units", new JSONArray()
                             .put(new JSONObject()
                                     .put("payee", new JSONObject()
-                                            .put("client_id", fragment.getConfiguration().getPayPal().getClientId())
+                                            .put("client_id", fragment.getConfiguration().getGooglePayment().getPaypalClientId())
                                     )
                                     .put("recurring_payment", "true")
                             )
@@ -455,7 +455,7 @@ public class GooglePayment {
                             .put("braintree:merchantId",
                                     fragment.getConfiguration().getMerchantId())
                             .put("braintree:paypalClientId",
-                                    fragment.getConfiguration().getPayPal().getClientId())
+                                    fragment.getConfiguration().getGooglePayment().getPaypalClientId())
                             .put("braintree:metadata", (new JSONObject()
                                     .put("source", "client")
                                     .put("integration", fragment.getIntegrationType())
@@ -507,8 +507,7 @@ public class GooglePayment {
         }
 
         boolean googlePaymentCanProcessPayPal = request.isPayPalEnabled() &&
-                configuration.isPayPalEnabled() &&
-                !TextUtils.isEmpty(configuration.getPayPal().getClientId());
+                !TextUtils.isEmpty(configuration.getGooglePayment().getPaypalClientId());
 
         if (googlePaymentCanProcessPayPal) {
             if (request.getAllowedPaymentMethod("PAYPAL") == null) {
