@@ -198,6 +198,12 @@ public class GooglePayment {
             @Override
             public void onConfigurationFetched(Configuration configuration) {
 
+                if (!configuration.getGooglePayment().isEnabled(fragment.getApplicationContext())) {
+                    fragment.postCallback(new BraintreeException("This merchant does not have Google Pay enabled," +
+                            " or Google Play Services are not configured correctly."));
+                    return;
+                }
+
                 setGooglePaymentRequestDefaults(fragment, configuration, request);
 
                 fragment.sendAnalyticsEvent("google-payment.started");
