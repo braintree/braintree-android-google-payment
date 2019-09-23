@@ -2,6 +2,7 @@ package com.braintreepayments.api;
 
 import android.content.Intent;
 
+import com.braintreepayments.api.exceptions.BraintreeException;
 import com.braintreepayments.api.exceptions.InvalidArgumentException;
 import com.braintreepayments.api.models.Authorization;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
@@ -49,6 +50,25 @@ public class GooglePaymentUnitTest {
                     .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
                     .setCurrencyCode("USD")
                     .build());
+    }
+
+    @Test
+    public void requestPayment_whenMerchantNotConfigured_returnsExceptionToFragment() {
+        String configuration = new TestConfigurationBuilder()
+                .paypal(new TestConfigurationBuilder.TestPayPalConfigurationBuilder(true))
+                .build();
+
+        BraintreeFragment fragment = new MockFragmentBuilder()
+                .configuration(configuration)
+                .build();
+
+        GooglePayment.requestPayment(fragment, mBaseRequest);
+
+        ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
+        verify(fragment).postCallback(captor.capture());
+        assertTrue(captor.getValue() instanceof BraintreeException);
+        assertEquals("This merchant does not have Google Pay enabled, or Google Play Services are not configured correctly.",
+                captor.getValue().getMessage());
     }
 
     @Test
