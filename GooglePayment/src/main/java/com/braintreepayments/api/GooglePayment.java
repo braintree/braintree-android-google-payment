@@ -199,7 +199,7 @@ public class GooglePayment {
             public void onConfigurationFetched(Configuration configuration) {
 
                 if (!configuration.getGooglePayment().isEnabled(fragment.getApplicationContext())) {
-                    fragment.postCallback(new BraintreeException("This merchant does not have Google Pay enabled," +
+                    fragment.postCallback(new BraintreeException("Google Pay enabled is not enabled for your Braintree account," +
                             " or Google Play Services are not configured correctly."));
                     return;
                 }
