@@ -82,9 +82,7 @@ public class GooglePaymentUnitTest {
 
     @Test
     public void requestPayment_whenMerchantNotConfigured_returnsExceptionToFragment() {
-        String configuration = new TestConfigurationBuilder()
-                .paypal(new TestConfigurationBuilder.TestPayPalConfigurationBuilder(true))
-                .build();
+        String configuration = new TestConfigurationBuilder().build();
 
         BraintreeFragment fragment = new MockFragmentBuilder()
                 .configuration(configuration)
