@@ -1,5 +1,9 @@
 # Braintree Android Google Pay SDK Release Notes
 
+## 3.1.0
+
+* Add check in `requestPayment` to avoid Null Pointer Exception
+
 ## 3.0.1
 
 * Resolve issue where optional shipping parameters were treated as if they were required
