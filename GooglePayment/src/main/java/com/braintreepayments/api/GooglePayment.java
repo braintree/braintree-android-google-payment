@@ -3,7 +3,6 @@ package com.braintreepayments.api;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.Build;
 import android.text.TextUtils;
 
 import com.braintreepayments.api.exceptions.BraintreeException;
