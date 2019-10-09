@@ -1,5 +1,8 @@
 # Braintree Android Google Pay SDK Release Notes
 
+## 3.1.1
+Fix setting the correct version in metadata
+
 ## 3.1.0
 
 * Add check in `requestPayment` to avoid Null Pointer Exception
