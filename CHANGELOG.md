@@ -1,5 +1,8 @@
 # Braintree Android Google Pay SDK Release Notes
 
+## 3.2.0
+* Add support for `isNetworkTokenized`
+
 ## 3.1.1
 Fix setting the correct version in metadata
 
