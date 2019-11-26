@@ -1,5 +1,8 @@
 # Braintree Android Google Pay SDK Release Notes
 
+## unreleased
+* Add support for GooglePay "Existing Payment Method" configuration
+
 ## 3.2.0
 * Add support for `isNetworkTokenized`
 
