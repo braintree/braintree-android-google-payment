@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import java.util.Iterator;
 
 public class PaymentMethodNonceFactory {
-    public static JSONObject extractPaymentMethodToken(String paymentDataString) throws JSONException {
+    static JSONObject extractPaymentMethodToken(String paymentDataString) throws JSONException {
         return new JSONObject(new JSONObject(paymentDataString)
                         .getJSONObject("paymentMethodData")
                         .getJSONObject("tokenizationData")
