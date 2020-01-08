@@ -150,7 +150,7 @@ public class GooglePayment {
      * {@link CardRequirements} via
      * {@link CardRequirements.Builder#addAllowedCardNetworks(Collection)}}.
      *
-     * @param fragment {@link com.braintreepayments.api.BraintreeFragment}
+     * @param fragment {@link BraintreeFragment}
      * @param listener Instance of {@link TokenizationParametersListener} to receive the
      *                 {@link PaymentMethodTokenizationParameters}.
      */
