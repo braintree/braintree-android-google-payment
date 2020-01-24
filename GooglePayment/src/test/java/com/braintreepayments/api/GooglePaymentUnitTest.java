@@ -23,7 +23,7 @@ import com.braintreepayments.api.test.TestConfigurationBuilder;
 import com.braintreepayments.api.test.TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
@@ -44,8 +44,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.Arrays;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_ENVIRONMENT;
 import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_PAYMENT_DATA_REQUEST;
@@ -103,9 +102,8 @@ public class GooglePaymentUnitTest {
 
     @Test
     public void isReadyToPay_sendsIsReadyToPayRequest() throws JSONException {
-        Task<Boolean> task = (Task<Boolean>) mock(Task.class);
         PaymentsClient mockPaymentsClient = mock(PaymentsClient.class);
-        when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(task);
+        when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(Tasks.forResult(true));
 
         mockStatic(Wallet.class);
         when(Wallet.getPaymentsClient(any(Activity.class), any(Wallet.WalletOptions.class))).thenReturn(mockPaymentsClient);
@@ -119,33 +117,41 @@ public class GooglePaymentUnitTest {
 
         ArgumentCaptor<IsReadyToPayRequest> captor = ArgumentCaptor.forClass(IsReadyToPayRequest.class);
         verify(mockPaymentsClient).isReadyToPay(captor.capture());
+        String actualJson = captor.getValue().toJson();
 
-        JSONObject request = new JSONObject(captor.getValue().toJson());
+        String expectedJson = "{\n" +
+                "  \"apiVersion\": 2,\n" +
+                "  \"apiVersionMinor\": 0,\n" +
+                "  \"allowedPaymentMethods\": [\n" +
+                "    {\n" +
+                "      \"type\": \"CARD\",\n" +
+                "      \"parameters\": {\n" +
+                "        \"allowedAuthMethods\": [\n" +
+                "          \"PAN_ONLY\",\n" +
+                "          \"CRYPTOGRAM_3DS\"\n" +
+                "        ],\n" +
+                "        \"allowedCardNetworks\": [\n" +
+                "          \"AMEX\",\n" +
+                "          \"VISA\"\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
 
-        assertEquals(2, request.getInt("apiVersion"));
-        assertEquals(0, request.getInt("apiVersionMinor"));
-
-        JSONObject allowedPaymentMethod = request.getJSONArray("allowedPaymentMethods").getJSONObject(0);
-        assertEquals("CARD", allowedPaymentMethod.getString("type"));
-
-        JSONArray allowedAuthMethods = allowedPaymentMethod.getJSONObject("parameters").getJSONArray("allowedAuthMethods");
-        assertEquals(new JSONArray(Arrays.asList("PAN_ONLY", "CRYPTOGRAM_3DS")), allowedAuthMethods);
-
-        JSONArray allowedCardNetworks = allowedPaymentMethod.getJSONObject("parameters").getJSONArray("allowedCardNetworks");
-        assertEquals(new JSONArray(Arrays.asList("AMEX", "VISA")), allowedCardNetworks);
+        JSONAssert.assertEquals(expectedJson, actualJson, false);
     }
 
     @Test
-    public void isReadyToPay_whenExistingPaymentMethodRequired_sendsIsReadyToPayRequestWithExistingPaymentRequirement() throws JSONException {
-        Task<Boolean> task = (Task<Boolean>) mock(Task.class);
+    public void isReadyToPay_whenExistingPaymentMethodRequired_sendsIsReadyToPayRequestWithExistingPaymentRequired() throws JSONException {
         PaymentsClient mockPaymentsClient = mock(PaymentsClient.class);
-        when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(task);
+        when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(Tasks.forResult(true));
 
         mockStatic(Wallet.class);
         when(Wallet.getPaymentsClient(any(Activity.class), any(Wallet.WalletOptions.class))).thenReturn(mockPaymentsClient);
 
-        ReadyForGooglePayRequest gpayRequest = new ReadyForGooglePayRequest().existingPaymentMethodRequired(true);
-        GooglePayment.isReadyToPay(mMockFragment, gpayRequest, new BraintreeResponseListener<Boolean>() {
+        ReadyForGooglePayRequest readyForGooglePayRequest = new ReadyForGooglePayRequest().existingPaymentMethodRequired(true);
+        GooglePayment.isReadyToPay(mMockFragment, readyForGooglePayRequest, new BraintreeResponseListener<Boolean>() {
             @Override
             public void onResponse(Boolean aBoolean) {
                 // do nothing
@@ -154,9 +160,30 @@ public class GooglePaymentUnitTest {
 
         ArgumentCaptor<IsReadyToPayRequest> captor = ArgumentCaptor.forClass(IsReadyToPayRequest.class);
         verify(mockPaymentsClient).isReadyToPay(captor.capture());
+        String actualJson = captor.getValue().toJson();
 
-        JSONObject request = new JSONObject(captor.getValue().toJson());
-        assertTrue(request.getBoolean("existingPaymentMethodRequired"));
+        String expectedJson = "{\n" +
+                "  \"apiVersion\": 2,\n" +
+                "  \"apiVersionMinor\": 0,\n" +
+                "  \"allowedPaymentMethods\": [\n" +
+                "    {\n" +
+                "      \"type\": \"CARD\",\n" +
+                "      \"parameters\": {\n" +
+                "        \"allowedAuthMethods\": [\n" +
+                "          \"PAN_ONLY\",\n" +
+                "          \"CRYPTOGRAM_3DS\"\n" +
+                "        ],\n" +
+                "        \"allowedCardNetworks\": [\n" +
+                "          \"AMEX\",\n" +
+                "          \"VISA\"\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"existingPaymentMethodRequired\": true\n" +
+                "}";
+
+        JSONAssert.assertEquals(expectedJson, actualJson, false);
     }
 
     @Test
