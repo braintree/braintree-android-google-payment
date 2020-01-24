@@ -1,1 +1,1 @@
-include ':GooglePayment'
+include ':GooglePayment', ':Demo'
