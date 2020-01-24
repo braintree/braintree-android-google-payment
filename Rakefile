@@ -1,8 +1,6 @@
 require 'rake'
 require 'io/console'
 
-TMP_CHANGELOG_FILE = "/tmp/braintree-android-google-payment-release.md"
-
 task :default => :unit_tests
 
 desc "Run Android lint on all modules"
@@ -29,13 +27,11 @@ end
 
 desc "Interactive release to publish new version"
 task :release => :unit_tests do
-  puts "Ensure all tests are passing (`rake`)."
-  $stdin.gets
+  Rake::Task["assumptions"].invoke
 
   puts "What version are you releasing? (x.x.x format)"
   version = $stdin.gets.chomp
 
-  prompt_for_change_log(version)
   update_version(version)
   update_readme_version(version)
 
@@ -44,6 +40,18 @@ task :release => :unit_tests do
   Rake::Task["release_braintree_google_payment"].invoke
 
   post_release(version)
+end
+
+task :assumptions do
+    puts "Release Assumptions"
+    puts "* [ ] You are on the branch and commit you want to release."
+    puts "* [ ] You have already merged hotfixes and pulled changes."
+    puts "* [ ] You have already reviewed the diff between the current release and the last tag, noting breaking changes in the semver and CHANGELOG."
+    puts "* [ ] Tests (rake integration_tests) are passing, manual verifications complete."
+    puts "* [ ] Email is composed and ready to send to braintree-sdk-announce@googlegroups.com"
+
+    puts "Ready to release? Press any key to continue. "
+    $stdin.gets
 end
 
 task :release_braintree_google_payment do
@@ -62,40 +70,6 @@ def prompt_for_sonatype_username_and_password
   ENV["SONATYPE_PASSWORD"] = $stdin.noecho(&:gets).chomp
 end
 
-def prompt_for_change_log(version)
-  last_version = `git tag --sort=version:refname | tail -1`.chomp
-  tmp_change_log = "#{version}"
-  tmp_change_log += "\n\n# Please enter a summary of the changes below."
-  tmp_change_log += "\n# Lines starting with '# ' will be ignored."
-  tmp_change_log += "\n#"
-  tmp_change_log += "\n# Changes since #{last_version}:"
-  tmp_change_log += "\n#"
-  tmp_change_log += "\n# "
-  tmp_change_log += `git log --pretty=format:"%h %ad%x20%s%x20%x28%an%x29" --date=short #{last_version}..`.gsub("\n", "\n# ")
-  tmp_change_log += "\n#"
-  tmp_change_log += "\n"
-  File.foreach("CHANGELOG.md") do |line|
-    tmp_change_log += "# #{line}"
-  end
-  IO.write(TMP_CHANGELOG_FILE, tmp_change_log)
-
-  puts "\n"
-  sh "$EDITOR #{TMP_CHANGELOG_FILE}"
-
-  new_changes = ""
-  File.foreach(TMP_CHANGELOG_FILE) do |line|
-    if !line.start_with?("# ") && !line.start_with?("#\n")
-      new_changes += line
-    end
-  end
-
-  IO.write("CHANGELOG.md",
-    File.open("CHANGELOG.md") do |file|
-      file.read.gsub("# Braintree Android Google Pay SDK Release Notes\n", "# Braintree Android Google Pay SDK Release Notes\n\n## #{new_changes.chomp}")
-    end
-  )
-end
-
 def post_release(version)
   if !`git remote`.include?("github")
     sh "git remote add github https://github.com/braintree/braintree-android-google-payment.git"
@@ -103,7 +77,7 @@ def post_release(version)
 
   puts "\nArchives are uploaded! Committing and tagging #{version} and preparing for the next development iteration"
   sh "git commit -am 'Release #{version}'"
-  sh "git tag -aF #{TMP_CHANGELOG_FILE} #{version}"
+  sh "git tag #{version} -a -m 'Release #{version}'"
 
   version_values = version.split('.')
   version_values[2] = version_values[2].to_i + 1
