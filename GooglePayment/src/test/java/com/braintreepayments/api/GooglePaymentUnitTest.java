@@ -17,7 +17,7 @@ import com.braintreepayments.api.models.GooglePaymentCardNonce;
 import com.braintreepayments.api.models.GooglePaymentRequest;
 import com.braintreepayments.api.models.PayPalAccountNonce;
 import com.braintreepayments.api.models.PaymentMethodNonce;
-import com.braintreepayments.api.models.ReadyForGooglePayRequest;
+import com.braintreepayments.api.models.ReadyForGooglePaymentRequest;
 import com.braintreepayments.api.test.FixturesHelper;
 import com.braintreepayments.api.test.TestConfigurationBuilder;
 import com.braintreepayments.api.test.TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder;
@@ -150,8 +150,8 @@ public class GooglePaymentUnitTest {
         mockStatic(Wallet.class);
         when(Wallet.getPaymentsClient(any(Activity.class), any(Wallet.WalletOptions.class))).thenReturn(mockPaymentsClient);
 
-        ReadyForGooglePayRequest readyForGooglePayRequest = new ReadyForGooglePayRequest().existingPaymentMethodRequired(true);
-        GooglePayment.isReadyToPay(mMockFragment, readyForGooglePayRequest, new BraintreeResponseListener<Boolean>() {
+        ReadyForGooglePaymentRequest readyForGooglePaymentRequest = new ReadyForGooglePaymentRequest().existingPaymentMethodRequired(true);
+        GooglePayment.isReadyToPay(mMockFragment, readyForGooglePaymentRequest, new BraintreeResponseListener<Boolean>() {
             @Override
             public void onResponse(Boolean aBoolean) {
                 // do nothing
