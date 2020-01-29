@@ -1,11 +1,15 @@
 package com.braintreepayments.api;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 
+import androidx.annotation.NonNull;
+
 import com.braintreepayments.api.exceptions.BraintreeException;
 import com.braintreepayments.api.exceptions.InvalidArgumentException;
+import com.braintreepayments.api.interfaces.BraintreeResponseListener;
 import com.braintreepayments.api.internal.ManifestValidator;
 import com.braintreepayments.api.models.Authorization;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
@@ -13,13 +17,19 @@ import com.braintreepayments.api.models.GooglePaymentCardNonce;
 import com.braintreepayments.api.models.GooglePaymentRequest;
 import com.braintreepayments.api.models.PayPalAccountNonce;
 import com.braintreepayments.api.models.PaymentMethodNonce;
+import com.braintreepayments.api.models.ReadyForGooglePaymentRequest;
 import com.braintreepayments.api.test.FixturesHelper;
 import com.braintreepayments.api.test.TestConfigurationBuilder;
+import com.braintreepayments.api.test.TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.tasks.Tasks;
+import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
+import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.TransactionInfo;
+import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
 
 import org.json.JSONArray;
@@ -34,8 +44,7 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricTestRunner;
-
-import androidx.annotation.NonNull;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_ENVIRONMENT;
 import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_PAYMENT_DATA_REQUEST;
@@ -44,40 +53,137 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@PrepareForTest({GoogleApiAvailability.class, ManifestValidator.class})
+@PrepareForTest({GoogleApiAvailability.class, ManifestValidator.class, Wallet.class})
 @PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*"})
 public class GooglePaymentUnitTest {
     @Rule
     public PowerMockRule mPowerMockRule = new PowerMockRule();
 
     private GooglePaymentRequest mBaseRequest;
+    private BraintreeFragment mMockFragment;
 
     @Before
     public void setup() {
-       mBaseRequest = new GooglePaymentRequest()
-            .transactionInfo(TransactionInfo.newBuilder()
-                    .setTotalPrice("1.00")
-                    .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
-                    .setCurrencyCode("USD")
-                    .build());
+        mBaseRequest = new GooglePaymentRequest()
+                .transactionInfo(TransactionInfo.newBuilder()
+                        .setTotalPrice("1.00")
+                        .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
+                        .setCurrencyCode("USD")
+                        .build());
 
-       GoogleApiAvailability mockGoogleApiAvailability = mock(GoogleApiAvailability.class);
-       when(mockGoogleApiAvailability.isGooglePlayServicesAvailable(any(Context.class))).thenReturn(ConnectionResult.SUCCESS);
+        String configuration = new TestConfigurationBuilder()
+                .googlePayment(new TestGooglePaymentConfigurationBuilder()
+                        .supportedNetworks(new String[]{"AMEX", "VISA"})
+                        .enabled(true))
+                .build();
 
-       mockStatic(GoogleApiAvailability.class);
-       when(GoogleApiAvailability.getInstance()).thenReturn(mockGoogleApiAvailability);
+        mMockFragment = new MockFragmentBuilder()
+                .configuration(configuration)
+                .build();
 
-       ActivityInfo mockActivityInfo = mock(ActivityInfo.class);
-       when(mockActivityInfo.getThemeResource()).thenReturn(2132083045);
+        GoogleApiAvailability mockGoogleApiAvailability = mock(GoogleApiAvailability.class);
+        when(mockGoogleApiAvailability.isGooglePlayServicesAvailable(any(Context.class))).thenReturn(ConnectionResult.SUCCESS);
 
-       mockStatic(ManifestValidator.class);
-       when(ManifestValidator.getActivityInfo(any(Context.class), any(Class.class))).thenReturn(mockActivityInfo);
+        mockStatic(GoogleApiAvailability.class);
+        when(GoogleApiAvailability.getInstance()).thenReturn(mockGoogleApiAvailability);
+
+        ActivityInfo mockActivityInfo = mock(ActivityInfo.class);
+        when(mockActivityInfo.getThemeResource()).thenReturn(2132083045);
+
+        mockStatic(ManifestValidator.class);
+        when(ManifestValidator.getActivityInfo(any(Context.class), any(Class.class))).thenReturn(mockActivityInfo);
+    }
+
+    @Test
+    public void isReadyToPay_sendsIsReadyToPayRequest() throws JSONException {
+        PaymentsClient mockPaymentsClient = mock(PaymentsClient.class);
+        when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(Tasks.forResult(true));
+
+        mockStatic(Wallet.class);
+        when(Wallet.getPaymentsClient(any(Activity.class), any(Wallet.WalletOptions.class))).thenReturn(mockPaymentsClient);
+
+        GooglePayment.isReadyToPay(mMockFragment, null, new BraintreeResponseListener<Boolean>() {
+            @Override
+            public void onResponse(Boolean aBoolean) {
+                // do nothing
+            }
+        });
+
+        ArgumentCaptor<IsReadyToPayRequest> captor = ArgumentCaptor.forClass(IsReadyToPayRequest.class);
+        verify(mockPaymentsClient).isReadyToPay(captor.capture());
+        String actualJson = captor.getValue().toJson();
+
+        String expectedJson = "{\n" +
+                "  \"apiVersion\": 2,\n" +
+                "  \"apiVersionMinor\": 0,\n" +
+                "  \"allowedPaymentMethods\": [\n" +
+                "    {\n" +
+                "      \"type\": \"CARD\",\n" +
+                "      \"parameters\": {\n" +
+                "        \"allowedAuthMethods\": [\n" +
+                "          \"PAN_ONLY\",\n" +
+                "          \"CRYPTOGRAM_3DS\"\n" +
+                "        ],\n" +
+                "        \"allowedCardNetworks\": [\n" +
+                "          \"AMEX\",\n" +
+                "          \"VISA\"\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        JSONAssert.assertEquals(expectedJson, actualJson, false);
+    }
+
+    @Test
+    public void isReadyToPay_whenExistingPaymentMethodRequired_sendsIsReadyToPayRequestWithExistingPaymentRequired() throws JSONException {
+        PaymentsClient mockPaymentsClient = mock(PaymentsClient.class);
+        when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(Tasks.forResult(true));
+
+        mockStatic(Wallet.class);
+        when(Wallet.getPaymentsClient(any(Activity.class), any(Wallet.WalletOptions.class))).thenReturn(mockPaymentsClient);
+
+        ReadyForGooglePaymentRequest readyForGooglePaymentRequest = new ReadyForGooglePaymentRequest().existingPaymentMethodRequired(true);
+        GooglePayment.isReadyToPay(mMockFragment, readyForGooglePaymentRequest, new BraintreeResponseListener<Boolean>() {
+            @Override
+            public void onResponse(Boolean aBoolean) {
+                // do nothing
+            }
+        });
+
+        ArgumentCaptor<IsReadyToPayRequest> captor = ArgumentCaptor.forClass(IsReadyToPayRequest.class);
+        verify(mockPaymentsClient).isReadyToPay(captor.capture());
+        String actualJson = captor.getValue().toJson();
+
+        String expectedJson = "{\n" +
+                "  \"apiVersion\": 2,\n" +
+                "  \"apiVersionMinor\": 0,\n" +
+                "  \"allowedPaymentMethods\": [\n" +
+                "    {\n" +
+                "      \"type\": \"CARD\",\n" +
+                "      \"parameters\": {\n" +
+                "        \"allowedAuthMethods\": [\n" +
+                "          \"PAN_ONLY\",\n" +
+                "          \"CRYPTOGRAM_3DS\"\n" +
+                "        ],\n" +
+                "        \"allowedCardNetworks\": [\n" +
+                "          \"AMEX\",\n" +
+                "          \"VISA\"\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"existingPaymentMethodRequired\": true\n" +
+                "}";
+
+        JSONAssert.assertEquals(expectedJson, actualJson, false);
     }
 
     @Test
@@ -209,7 +315,7 @@ public class GooglePaymentUnitTest {
     @Test
     public void requestPayment_whenPayPalDisabledInConfigurationAndGooglePayHasPayPalClientId_tokenizationPropertiesContainPayPal() throws JSONException {
         TestConfigurationBuilder configuration = new TestConfigurationBuilder()
-                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                .googlePayment(new TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .paypalClientId("paypal-client-id-for-google-payment")
@@ -238,7 +344,7 @@ public class GooglePaymentUnitTest {
     @Test
     public void requestPayment_usesGooglePaymentConfigurationClientId() throws JSONException {
          TestConfigurationBuilder configuration = new TestConfigurationBuilder()
-                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                .googlePayment(new TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .paypalClientId("paypal-client-id-for-google-payment")
@@ -276,7 +382,7 @@ public class GooglePaymentUnitTest {
     @Test
     public void requestPayment_whenGooglePaymentConfigurationLacksClientId_tokenizationPropertiesLackPayPal() throws JSONException {
         TestConfigurationBuilder configuration = new TestConfigurationBuilder()
-                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                .googlePayment(new TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
@@ -334,7 +440,7 @@ public class GooglePaymentUnitTest {
 
     private BraintreeFragment getSetupFragment(String environment) {
         String configuration = new TestConfigurationBuilder()
-                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                .googlePayment(new TestGooglePaymentConfigurationBuilder()
                         .environment(environment)
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .paypalClientId("paypal-client-id-for-google-payment")
