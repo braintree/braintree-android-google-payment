@@ -1,6 +1,6 @@
 # Braintree Android Google Pay SDK Release Notes
 
-## unreleased
+## 3.3.0
 * Add support for Google Pay's `existingPaymentMethodRequired` option
 
 ## 3.2.0
