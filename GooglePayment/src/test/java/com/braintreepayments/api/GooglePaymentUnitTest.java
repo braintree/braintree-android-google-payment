@@ -79,7 +79,7 @@ public class GooglePaymentUnitTest {
 
         String configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestGooglePaymentConfigurationBuilder()
-                        .supportedNetworks(new String[]{"AMEX", "VISA"})
+                        .supportedNetworks(new String[]{"amex", "visa"})
                         .enabled(true))
                 .build();
 
