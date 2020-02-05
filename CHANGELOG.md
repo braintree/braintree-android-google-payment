@@ -1,7 +1,7 @@
 # Braintree Android Google Pay SDK Release Notes
 
-## unreleased
-* Fix card names in isReadyToPayRequest to be uppercase
+## 3.3.1
+* Fix `allowedCardNetworks` in `isReadyToPayRequest` to be uppercased. Thanks @fcastagnozzi.
 
 ## 3.3.0
 * Add support for Google Pay's `existingPaymentMethodRequired` option
