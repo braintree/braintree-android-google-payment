@@ -7,12 +7,13 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode = rootProject.ext.versionCode
         versionName = rootProject.ext.versionName
 
         consumerProguardFiles 'proguard.pro'
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     lintOptions {
@@ -28,18 +29,21 @@ android {
     }
 }
 
-def braintreeVersion = '3.7.0'
-
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.google.android.gms:play-services-wallet:16.0.1'
 
-    compileOnly("com.braintreepayments.api:braintree:$braintreeVersion") {
+    compileOnly("com.braintreepayments.api:braintree:+") {
         exclude module: 'google-payment'
         because 'Use this development version'
     }
 
-    testImplementation("com.braintreepayments.api:braintree:$braintreeVersion") {
+    testImplementation("com.braintreepayments.api:braintree:+") {
+        exclude module: 'google-payment'
+        because 'Use this development version'
+    }
+
+    androidTestImplementation("com.braintreepayments.api:braintree:+") {
         exclude module: 'google-payment'
         because 'Use this development version'
     }
@@ -54,6 +58,11 @@ dependencies {
     testImplementation 'org.robolectric:robolectric:4.3'
     testImplementation 'org.skyscreamer:jsonassert:1.4.0'
     testImplementation 'com.squareup.assertj:assertj-android:1.1.1'
+
+    androidTestImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test:rules:1.1.0'
+    androidTestImplementation 'com.google.dexmaker:dexmaker-mockito:1.2'
 }
 
 /* maven deploy + signing */
