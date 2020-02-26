@@ -45,6 +45,7 @@ import com.google.android.gms.wallet.WalletConstants;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -88,7 +89,7 @@ public class GooglePayment {
      * checkout options.
      *
      * @param fragment {@link BraintreeFragment}
-     * @param request {@link ReadyForGooglePaymentRequest}
+     * @param request  {@link ReadyForGooglePaymentRequest}
      * @param listener Instance of {@link BraintreeResponseListener<Boolean>} to receive the
      *                 isReadyToPay response.
      */
@@ -119,21 +120,36 @@ public class GooglePayment {
                                 .setEnvironment(getEnvironment(configuration.getGooglePayment()))
                                 .build());
 
-                JSONObject json = new JSONObject();
-                JSONArray allowedCardNetworks = buildCardNetworks(fragment);
 
+                JSONObject json = new JSONObject();
                 try {
+                    JSONArray allowedCardNetworks = buildCardNetworks(fragment);
+                    JSONArray allowedPaymentMethods = new JSONArray()
+                            .put(new JSONObject()
+                                    .put("type", "CARD")
+                                    .put("parameters", new JSONObject()
+                                            .put("allowedAuthMethods", new JSONArray()
+                                                    .put("PAN_ONLY")
+                                                    .put("CRYPTOGRAM_3DS"))
+                                            .put("allowedCardNetworks", allowedCardNetworks)));
+
+                    String paypalClientId = configuration.getGooglePayment().getPaypalClientId();
+                    if (paypalClientId != null && !TextUtils.isEmpty(paypalClientId)) {
+                        allowedPaymentMethods
+                                .put(new JSONObject()
+                                        .put("type", "PAYPAL")
+                                        .put("parameters", new JSONObject()
+                                                .put("purchase_context", new JSONObject()
+                                                        .put("purchase_units", new JSONArray()
+                                                                .put(new JSONObject()
+                                                                        .put("payee", new JSONObject()
+                                                                                .put("merchant_id", paypalClientId)))))));
+                    }
+
                     json
                             .put("apiVersion", 2)
                             .put("apiVersionMinor", 0)
-                            .put("allowedPaymentMethods", new JSONArray()
-                                    .put(new JSONObject()
-                                            .put("type", "CARD")
-                                            .put("parameters", new JSONObject()
-                                                    .put("allowedAuthMethods", new JSONArray()
-                                                            .put("PAN_ONLY")
-                                                            .put("CRYPTOGRAM_3DS"))
-                                                    .put("allowedCardNetworks", allowedCardNetworks))));
+                            .put("allowedPaymentMethods", allowedPaymentMethods);
 
                     if (request != null) {
                         json.put("existingPaymentMethodRequired", request.isExistingPaymentMethodRequired());
@@ -161,7 +177,7 @@ public class GooglePayment {
     /**
      * Get Braintree specific tokenization parameters for a Google Payment. Useful for when full control over the
      * {@link PaymentDataRequest} is required.
-     *
+     * <p>
      * {@link PaymentMethodTokenizationParameters} should be supplied to the
      * {@link PaymentDataRequest} via
      * {@link PaymentDataRequest.Builder#setPaymentMethodTokenizationParameters(PaymentMethodTokenizationParameters)}

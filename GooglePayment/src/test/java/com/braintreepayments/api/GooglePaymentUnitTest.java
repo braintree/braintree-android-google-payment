@@ -143,6 +143,71 @@ public class GooglePaymentUnitTest {
     }
 
     @Test
+    public void isReadyToPay_sendsIsReadyToPayRequestWithPayPalClientId() throws JSONException {
+        String configuration = new TestConfigurationBuilder()
+                .googlePayment(new TestGooglePaymentConfigurationBuilder()
+                        .supportedNetworks(new String[]{"amex", "visa"})
+                        .paypalClientId("paypal-client-id")
+                        .enabled(true))
+                .build();
+
+        mMockFragment = new MockFragmentBuilder()
+                .configuration(configuration)
+                .build();
+
+        PaymentsClient mockPaymentsClient = mock(PaymentsClient.class);
+        when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(Tasks.forResult(true));
+
+        mockStatic(Wallet.class);
+        when(Wallet.getPaymentsClient(any(Activity.class), any(Wallet.WalletOptions.class))).thenReturn(mockPaymentsClient);
+
+        GooglePayment.isReadyToPay(mMockFragment, null, new BraintreeResponseListener<Boolean>() {
+            @Override
+            public void onResponse(Boolean aBoolean) {
+                // do nothing
+            }
+        });
+
+        ArgumentCaptor<IsReadyToPayRequest> captor = ArgumentCaptor.forClass(IsReadyToPayRequest.class);
+        verify(mockPaymentsClient).isReadyToPay(captor.capture());
+        String actualJson = captor.getValue().toJson();
+
+        String expectedJson = "{\n" +
+                "  \"apiVersion\": 2,\n" +
+                "  \"apiVersionMinor\": 0,\n" +
+                "  \"allowedPaymentMethods\": [\n" +
+                "    {\n" +
+                "      \"type\": \"CARD\",\n" +
+                "      \"parameters\": {\n" +
+                "        \"allowedAuthMethods\": [\n" +
+                "          \"PAN_ONLY\",\n" +
+                "          \"CRYPTOGRAM_3DS\"\n" +
+                "        ],\n" +
+                "        \"allowedCardNetworks\": [\n" +
+                "          \"AMEX\",\n" +
+                "          \"VISA\"\n" +
+                "        ]\n" +
+                "      }\n" +
+                "    },\n" +
+                "    {\n" +
+                "      \"type\": \"PAYPAL\",\n" +
+                "      \"parameters\": {\n" +
+                "        \"purchase_context\": {\n" +
+                "          \"purchase_units\": [{\n" +
+                "            \"payee\": {\n" +
+                "              \"merchant_id\": \"paypal-client-id\"\n" +
+                "            }\n" +
+                "          }]\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+
+        JSONAssert.assertEquals(expectedJson, actualJson, false);
+    }
+
+    @Test
     public void isReadyToPay_whenExistingPaymentMethodRequired_sendsIsReadyToPayRequestWithExistingPaymentRequired() throws JSONException {
         PaymentsClient mockPaymentsClient = mock(PaymentsClient.class);
         when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(Tasks.forResult(true));
