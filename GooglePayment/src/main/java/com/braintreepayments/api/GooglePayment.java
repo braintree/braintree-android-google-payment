@@ -134,7 +134,7 @@ public class GooglePayment {
                                             .put("allowedCardNetworks", allowedCardNetworks)));
 
                     String paypalClientId = configuration.getGooglePayment().getPaypalClientId();
-                    if (paypalClientId != null && !TextUtils.isEmpty(paypalClientId)) {
+                    if (!TextUtils.isEmpty(paypalClientId)) {
                         allowedPaymentMethods
                                 .put(new JSONObject()
                                         .put("type", "PAYPAL")
