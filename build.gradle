@@ -17,13 +17,6 @@ plugins {
     id 'io.codearte.nexus-staging' version '0.21.2'
 }
 
-allprojects {
-    repositories {
-        jcenter()
-        google()
-    }
-}
-
 version = '3.3.2-SNAPSHOT'
 ext {
     compileSdkVersion = 28
@@ -32,6 +25,13 @@ ext {
     versionCode = 11
     versionName = version
     braintreeVersion = '3.7.0'
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        google()
+    }
 }
 
 nexusStaging {
