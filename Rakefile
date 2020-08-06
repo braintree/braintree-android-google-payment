@@ -13,18 +13,6 @@ task :unit_tests => :lint do
   sh "./gradlew --continue test"
 end
 
-desc "Publish current version as a SNAPSHOT"
-task :publish_snapshot => :unit_tests do
-  abort("Version must contain '-SNAPSHOT'!") unless get_current_version.end_with?('-SNAPSHOT')
-
-  puts "Ensure all tests are passing (`rake`)."
-  $stdin.gets
-
-  prompt_for_sonatype_username_and_password
-
-  sh "./gradlew clean :GooglePayment:uploadArchives"
-end
-
 desc "Interactive release to publish new version"
 task :release => :unit_tests do
   Rake::Task["assumptions"].invoke
@@ -48,18 +36,14 @@ task :assumptions do
     puts "* [ ] You have already merged hotfixes and pulled changes."
     puts "* [ ] You have already reviewed the diff between the current release and the last tag, noting breaking changes in the semver and CHANGELOG."
     puts "* [ ] Tests (rake integration_tests) are passing, manual verifications complete."
-    puts "* [ ] Email is composed and ready to send to braintree-sdk-announce@googlegroups.com"
 
     puts "Ready to release? Press any key to continue. "
     $stdin.gets
 end
 
 task :release_braintree_google_payment do
-  sh "./gradlew clean :GooglePayment:uploadArchives"
+  sh "./gradlew clean :GooglePayment:publishToSonatype"
   sh "./gradlew closeAndReleaseRepository"
-  puts "Sleeping for 600 seconds"
-  sleep 600
-  puts "Braintree google pay module have been released"
 end
 
 def prompt_for_sonatype_username_and_password
