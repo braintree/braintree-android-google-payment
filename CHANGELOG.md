@@ -1,5 +1,9 @@
 # Braintree Android Google Pay SDK Release Notes
 
+## unreleased
+* Breaking Changes
+  * Bump `minSdkVersion` to 21.
+
 ## 3.3.1
 * Fix `allowedCardNetworks` in `isReadyToPayRequest` to be uppercased. Thanks @fcastagnozzi.
 
