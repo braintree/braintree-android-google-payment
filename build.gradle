@@ -1,34 +1,43 @@
 buildscript {
     repositories {
-        jcenter()
         google()
+        jcenter()
+        maven {
+            url = "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
-        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.11.0'
+        classpath 'com.android.tools.build:gradle:4.0.1'
+        classpath 'de.marcphilipp.gradle:nexus-publish-plugin:0.4.0'
+        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.2'
     }
+}
+
+plugins {
+    id 'io.codearte.nexus-staging' version '0.21.2'
+}
+
+version = '3.3.2-SNAPSHOT'
+ext {
+    compileSdkVersion = 28
+    minSdkVersion = 21
+    targetSdkVersion = 28
+    versionCode = 11
+    versionName = version
+    braintreeVersion = '3.7.0'
 }
 
 allprojects {
     repositories {
         jcenter()
         google()
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/releases/'
-        }
-        maven {
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
-        }
-        maven {
-            url 'file:///tmp/maven/'
-        }
     }
 }
 
-version = '3.3.2-SNAPSHOT'
-ext {
-  versionCode = 11
-  versionName = version
+nexusStaging {
+    packageGroup = "com.braintreepayments"
+    // give nexus sonatype more time to close the staging repository
+    delayBetweenRetriesInMillis = 20000
+    username = System.env['SONATYPE_USERNAME']
+    password = System.env['SONATYPE_PASSWORD']
 }
-
-apply plugin: 'io.codearte.nexus-staging'

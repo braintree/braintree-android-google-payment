@@ -94,7 +94,7 @@ public class GooglePaymentUnitTest {
         when(GoogleApiAvailability.getInstance()).thenReturn(mockGoogleApiAvailability);
 
         ActivityInfo mockActivityInfo = mock(ActivityInfo.class);
-        when(mockActivityInfo.getThemeResource()).thenReturn(2132083045);
+        when(mockActivityInfo.getThemeResource()).thenReturn(R.style.bt_transparent_activity);
 
         mockStatic(ManifestValidator.class);
         when(ManifestValidator.getActivityInfo(any(Context.class), any(Class.class))).thenReturn(mockActivityInfo);
