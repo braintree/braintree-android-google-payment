@@ -11,7 +11,8 @@ Add the dependency in your `build.gradle`:
 
 ```groovy
 dependencies {
-  compile 'com.braintreepayments.api:google-payment:3.3.1'
+  implementation 'com.braintreepayments.api:braintree:3.14.1'
+  implementation 'com.braintreepayments.api:google-payment:3.3.1'
 }
 ```
 
