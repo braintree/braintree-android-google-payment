@@ -19,9 +19,9 @@ plugins {
 
 version = '3.3.2-SNAPSHOT'
 ext {
-    compileSdkVersion = 28
+    compileSdkVersion = 30
     minSdkVersion = 21
-    targetSdkVersion = 28
+    targetSdkVersion = 30
     versionCode = 11
     versionName = version
     braintreeVersion = '3.7.0'
