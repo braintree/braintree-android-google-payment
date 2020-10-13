@@ -15,14 +15,6 @@ dependencies {
 }
 ```
 
-To use the latest build from the `master` branch use:
-
-```groovy
-dependencies {
-  compile 'com.braintreepayments.api:google-payment:3.3.2-SNAPSHOT'
-}
-```
-
 ## Help
 
 * [Read the javadocs](http://javadoc.io/doc/com.braintreepayments.api/google-payment/)
