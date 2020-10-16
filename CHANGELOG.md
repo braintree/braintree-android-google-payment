@@ -1,20 +1,26 @@
 # Braintree Android Google Pay SDK Release Notes
 
 ## unreleased
+
+* Bump `compileSdkVersion` and `targetSdkVersion` to API level 30
 * Breaking Changes
   * Bump `minSdkVersion` to 21.
 
 ## 3.3.1
+
 * Fix `allowedCardNetworks` in `isReadyToPayRequest` to be uppercased. Thanks @fcastagnozzi.
 
 ## 3.3.0
+
 * Add support for Google Pay's `existingPaymentMethodRequired` option
 
 ## 3.2.0
+
 * Add support for `isNetworkTokenized`
 
 ## 3.1.1
-Fix setting the correct version in metadata
+
+* Fix setting the correct version in metadata
 
 ## 3.1.0
 
@@ -47,3 +53,4 @@ Fix setting the correct version in metadata
 * Enable Google Payment as a separate and independently versioned moduled from Braintree Android
 * Supports Google Pay v1
 * Represents Google Payment as it was in Braintree Android version 2.18.1
+
