@@ -10,12 +10,14 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 
 import com.braintreepayments.api.exceptions.BraintreeException;
+import com.braintreepayments.api.exceptions.ErrorWithResponse;
 import com.braintreepayments.api.exceptions.GoogleApiClientException;
 import com.braintreepayments.api.googlepayment.R;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
 import com.braintreepayments.api.models.Configuration;
 import com.braintreepayments.api.models.GooglePaymentConfiguration;
 import com.braintreepayments.api.models.GooglePaymentRequest;
+import com.braintreepayments.api.models.PaymentMethodNonceFactory;
 import com.braintreepayments.api.models.ReadyForGooglePaymentRequest;
 import com.braintreepayments.api.models.TokenizationKey;
 import com.google.android.gms.common.api.ApiException;
@@ -167,7 +169,22 @@ public class GooglePaymentClient {
     }
 
     public void tokenize(FragmentActivity activity, PaymentData paymentData, TokenizationListener listener) {
+        try {
+            listener.onResult(null, PaymentMethodNonceFactory.fromString(paymentData.toJson()));
+            braintreeClient.sendAnalyticsEvent(activity, "google-payment.nonce-received");
+        } catch (JSONException | NullPointerException e) {
+            braintreeClient.sendAnalyticsEvent(activity, "google-payment.failed");
 
+            try {
+                String token = new JSONObject(paymentData.toJson())
+                        .getJSONObject("paymentMethodData")
+                        .getJSONObject("tokenizationData")
+                        .getString("token");
+                listener.onResult(ErrorWithResponse.fromJson(token), null);
+            } catch (JSONException | NullPointerException e1) {
+                listener.onResult(e1, null);
+            }
+        }
     }
 
     private void setGooglePaymentRequestDefaults(FragmentActivity activity, Configuration configuration,
