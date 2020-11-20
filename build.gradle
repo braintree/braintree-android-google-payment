@@ -24,11 +24,12 @@ ext {
     targetSdkVersion = 30
     versionCode = 11
     versionName = version
-    braintreeVersion = '3.14.1'
+    braintreeVersion = '4.0.0-SNAPSHOT'
 }
 
 allprojects {
     repositories {
+        mavenLocal()
         jcenter()
         google()
     }
