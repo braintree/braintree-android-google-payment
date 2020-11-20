@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.braintreepayments.api.exceptions.GoogleApiClientException;
 import com.braintreepayments.api.models.Configuration;
 import com.braintreepayments.api.models.GooglePaymentConfiguration;
+import com.braintreepayments.api.models.GooglePaymentRequest;
 import com.braintreepayments.api.models.ReadyForGooglePaymentRequest;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -84,20 +85,24 @@ public class GooglePaymentClient {
 
                 } catch (JSONException ignored) {
                 }
-                IsReadyToPayRequest request2 = IsReadyToPayRequest.fromJson(json.toString());
+                IsReadyToPayRequest request = IsReadyToPayRequest.fromJson(json.toString());
 
-                paymentsClient.isReadyToPay(request2).addOnCompleteListener(new OnCompleteListener<Boolean>() {
+                paymentsClient.isReadyToPay(request).addOnCompleteListener(new OnCompleteListener<Boolean>() {
                     @Override
                     public void onComplete(@NonNull Task<Boolean> task) {
-//                        try {
-//                            listener.onResult(null, task.getResult(ApiException.class));
-//                        } catch (ApiException e) {
-//                            listener.onResult(e, false);
-//                        }
+                        try {
+                            listener.onResult(null, task.getResult(ApiException.class));
+                        } catch (ApiException e) {
+                            listener.onResult(e, false);
+                        }
                     }
                 });
             }
         });
+    }
+
+    public void requestPayment(FragmentActivity activity, GooglePaymentRequest request, RequestPaymentListener listener) {
+
     }
 
     static int getEnvironment(GooglePaymentConfiguration configuration) {
