@@ -7,7 +7,6 @@ import android.content.pm.ActivityInfo;
 
 import androidx.fragment.app.FragmentActivity;
 
-import com.braintreepayments.MockBraintreeClientBuilder;
 import com.braintreepayments.api.exceptions.BraintreeException;
 import com.braintreepayments.api.exceptions.InvalidArgumentException;
 import com.braintreepayments.api.models.Authorization;
@@ -18,7 +17,7 @@ import com.braintreepayments.api.models.GooglePaymentRequest;
 import com.braintreepayments.api.models.PayPalAccountNonce;
 import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.braintreepayments.api.models.ReadyForGooglePaymentRequest;
-import com.braintreepayments.api.test.FixturesHelper;
+import com.braintreepayments.api.test.Fixtures;
 import com.braintreepayments.api.test.TestConfigurationBuilder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -542,8 +541,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void tokenize_withCardToken_returnsGooglePaymentNonce() throws JSONException, InvalidArgumentException {
-        // TODO: Convert fixtures to Kotlin and remove helper
-        String paymentDataJson = FixturesHelper.stringFromFixture("response/google_payment/card.json");
+        String paymentDataJson = Fixtures.RESPONSE_GOOGLE_PAYMENT_CARD;
 
         String configString = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
@@ -575,7 +573,7 @@ public class GooglePaymentClientUnitTest {
 
         @Test
     public void tokenize_withPayPalToken_returnsPayPalAccountNonce() throws JSONException, InvalidArgumentException {
-        String paymentDataJson = FixturesHelper.stringFromFixture("payment_methods/paypal_account_response.json");
+        String paymentDataJson = Fixtures.PAYMENT_METHODS_PAYPAL_ACCOUNT_RESPONSE;
 
         String configString = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
