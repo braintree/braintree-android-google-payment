@@ -13,13 +13,18 @@ import com.braintreepayments.api.exceptions.InvalidArgumentException;
 import com.braintreepayments.api.models.Authorization;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
 import com.braintreepayments.api.models.Configuration;
+import com.braintreepayments.api.models.GooglePaymentCardNonce;
 import com.braintreepayments.api.models.GooglePaymentRequest;
+import com.braintreepayments.api.models.PayPalAccountNonce;
+import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.braintreepayments.api.models.ReadyForGooglePaymentRequest;
+import com.braintreepayments.api.test.FixturesHelper;
 import com.braintreepayments.api.test.TestConfigurationBuilder;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
+import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
 import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.TransactionInfo;
@@ -47,6 +52,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -68,6 +74,7 @@ public class GooglePaymentClientUnitTest {
 
     private ReadyToPayListener readyToPayListener;
     private RequestPaymentListener requestPaymentListener;
+    private TokenizationListener tokenizationListener;
 
     private ActivityInfo activityInfo;
 
@@ -77,6 +84,7 @@ public class GooglePaymentClientUnitTest {
         braintreeClient = mock(BraintreeClient.class);
         readyToPayListener = mock(ReadyToPayListener.class);
         requestPaymentListener = mock(RequestPaymentListener.class);
+        tokenizationListener = mock(TokenizationListener.class);
         activityInfo = mock(ActivityInfo.class);
 
         baseRequest = new GooglePaymentRequest()
@@ -530,6 +538,71 @@ public class GooglePaymentClientUnitTest {
                 .getString("type"));
 
         assertFalse(allowedPaymentMethods.toString().contains("paypal-client-id-for-google-payment"));
+    }
+
+    @Test
+    public void tokenize_withCardToken_returnsGooglePaymentNonce() throws JSONException, InvalidArgumentException {
+        // TODO: Convert fixtures to Kotlin and remove helper
+        String paymentDataJson = FixturesHelper.stringFromFixture("response/google_payment/card.json");
+
+        String configString = new TestConfigurationBuilder()
+                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                        .environment("sandbox")
+                        .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .paypalClientId("paypal-client-id-for-google-payment")
+                        .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
+                        .enabled(true))
+                .withAnalytics()
+                .build();
+
+        BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
+                .configuration(Configuration.fromJson(configString))
+                .authorization(Authorization.fromString("sandbox_tokenization_string"))
+                .activityInfo(activityInfo)
+                .build();
+
+        PaymentData pd = PaymentData.fromJson(paymentDataJson);
+
+        GooglePaymentClient sut = new GooglePaymentClient(braintreeClient);
+
+        sut.tokenize(activity, pd, tokenizationListener);
+
+        ArgumentCaptor<PaymentMethodNonce> captor = ArgumentCaptor.forClass(PaymentMethodNonce.class);
+        verify(tokenizationListener).onResult((Exception)isNull(), captor.capture());
+
+        assertTrue(captor.getValue() instanceof GooglePaymentCardNonce);
+    }
+
+        @Test
+    public void tokenize_withPayPalToken_returnsPayPalAccountNonce() throws JSONException, InvalidArgumentException {
+        String paymentDataJson = FixturesHelper.stringFromFixture("payment_methods/paypal_account_response.json");
+
+        String configString = new TestConfigurationBuilder()
+                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                        .environment("sandbox")
+                        .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .paypalClientId("paypal-client-id-for-google-payment")
+                        .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
+                        .enabled(true))
+                .withAnalytics()
+                .build();
+
+        BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
+                .configuration(Configuration.fromJson(configString))
+                .authorization(Authorization.fromString("sandbox_tokenization_string"))
+                .activityInfo(activityInfo)
+                .build();
+
+        PaymentData pd = PaymentData.fromJson(paymentDataJson);
+
+        GooglePaymentClient sut = new GooglePaymentClient(braintreeClient);
+
+        sut.tokenize(activity, pd, tokenizationListener);
+
+        ArgumentCaptor<PaymentMethodNonce> captor = ArgumentCaptor.forClass(PaymentMethodNonce.class);
+        verify(tokenizationListener).onResult((Exception)isNull(), captor.capture());
+
+        assertTrue(captor.getValue() instanceof PayPalAccountNonce);
     }
 
     private JSONObject getPaymentDataRequestJsonSentToGooglePayment(FragmentActivity activity) {

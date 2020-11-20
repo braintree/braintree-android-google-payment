@@ -12,10 +12,7 @@ import androidx.fragment.app.FragmentActivity;
 import com.braintreepayments.api.exceptions.BraintreeException;
 import com.braintreepayments.api.exceptions.GoogleApiClientException;
 import com.braintreepayments.api.googlepayment.R;
-import com.braintreepayments.api.internal.ManifestValidator;
-import com.braintreepayments.api.models.Authorization;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
-import com.braintreepayments.api.models.ClientToken;
 import com.braintreepayments.api.models.Configuration;
 import com.braintreepayments.api.models.GooglePaymentConfiguration;
 import com.braintreepayments.api.models.GooglePaymentRequest;
@@ -25,6 +22,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
+import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
 import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.Wallet;
@@ -35,10 +33,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
-
-import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_ENVIRONMENT;
-import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_PAYMENT_DATA_REQUEST;
 
 public class GooglePaymentClient {
 
@@ -169,6 +163,10 @@ public class GooglePaymentClient {
                 activity.startActivityForResult(intent, BraintreeRequestCodes.GOOGLE_PAYMENT);
             }
         });
+
+    }
+
+    public void tokenize(FragmentActivity activity, PaymentData paymentData, TokenizationListener listener) {
 
     }
 
