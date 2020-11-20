@@ -1,4 +1,6 @@
 package com.braintreepayments.api;
 
-public class RequestPaymentListener {
+public interface RequestPaymentListener {
+
+    void onResult(Exception error, boolean paymentRequested);
 }

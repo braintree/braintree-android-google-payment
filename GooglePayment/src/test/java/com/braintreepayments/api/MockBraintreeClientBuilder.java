@@ -1,6 +1,7 @@
 package com.braintreepayments;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 
 import com.braintreepayments.api.BraintreeClient;
 import com.braintreepayments.api.ConfigurationListener;
@@ -8,6 +9,7 @@ import com.braintreepayments.api.interfaces.HttpResponseCallback;
 import com.braintreepayments.api.models.Authorization;
 import com.braintreepayments.api.models.Configuration;
 
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -37,6 +39,8 @@ public class MockBraintreeClientBuilder {
     private String integration;
 
     private boolean venmoAppSwitchAvailable;
+
+    private ActivityInfo activityInfo;
 
     public MockBraintreeClientBuilder configuration(Configuration configuration) {
         this.configuration = configuration;
@@ -97,6 +101,11 @@ public class MockBraintreeClientBuilder {
         return this;
     }
 
+    public MockBraintreeClientBuilder activityInfo(ActivityInfo activityInfo) {
+        this.activityInfo = activityInfo;
+        return this;
+    }
+
     public BraintreeClient build() {
         BraintreeClient braintreeClient = mock(BraintreeClient.class);
         when(braintreeClient.getAuthorization()).thenReturn(authorization);
@@ -104,6 +113,7 @@ public class MockBraintreeClientBuilder {
         when(braintreeClient.getIntegrationType(any(Context.class))).thenReturn(integration);
         when(braintreeClient.isVenmoAppSwitchAvailable(any(Context.class))).thenReturn(venmoAppSwitchAvailable);
         when(braintreeClient.isUrlSchemeDeclaredInAndroidManifest(any(Context.class), anyString(), any(Class.class))).thenReturn(true);
+        when(braintreeClient.getManifestActivityInfo(any(Context.class), any(Class.class))).thenReturn(activityInfo);
 
         doAnswer(new Answer<Void>() {
             @Override
