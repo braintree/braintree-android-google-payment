@@ -36,14 +36,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+// TODO: Unit test analytics events and errors thrown
 public class GooglePaymentClient {
 
     protected static final String EXTRA_ENVIRONMENT = "com.braintreepayments.api.EXTRA_ENVIRONMENT";
     protected static final String EXTRA_PAYMENT_DATA_REQUEST = "com.braintreepayments.api.EXTRA_PAYMENT_DATA_REQUEST";
-
-    private static final String EXTRA_RECREATING = "com.braintreepayments.api.EXTRA_RECREATING";
-
-    private static final int REQUEST_CODE = 1;
 
     private static final String VISA_NETWORK = "visa";
     private static final String MASTERCARD_NETWORK = "mastercard";
