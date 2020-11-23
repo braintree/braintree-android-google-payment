@@ -52,7 +52,7 @@ public class GooglePaymentClient {
 
     private BraintreeClient braintreeClient;
 
-    GooglePaymentClient(BraintreeClient braintreeClient) {
+    public GooglePaymentClient(BraintreeClient braintreeClient) {
         this.braintreeClient = braintreeClient;
     }
 

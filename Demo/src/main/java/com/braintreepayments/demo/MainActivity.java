@@ -1,5 +1,7 @@
 package com.braintreepayments.demo;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -10,8 +12,13 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import com.braintreepayments.api.BraintreeClient;
+import com.braintreepayments.api.GooglePayCapabilities;
 import com.braintreepayments.api.GooglePaymentClient;
+import com.braintreepayments.api.ReadyToPayListener;
 import com.braintreepayments.api.RequestPaymentListener;
+import com.braintreepayments.api.exceptions.InvalidArgumentException;
+import com.braintreepayments.api.models.Authorization;
+import com.braintreepayments.api.models.BinData;
 import com.braintreepayments.api.models.GooglePaymentCardNonce;
 import com.braintreepayments.api.models.GooglePaymentRequest;
 import com.braintreepayments.api.models.PaymentMethodNonce;
@@ -21,8 +28,17 @@ import com.google.android.gms.wallet.TransactionInfo;
 import com.google.android.gms.wallet.WalletConstants;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String RETURN_URL_SCHEME = "com.braintreepayments.demo.braintree";
+
+    protected String mAuthorization;
+    protected String mCustomerId;
+
+    private GooglePaymentClient googlePaymentClient;
+
+    private BraintreeClient braintreeClient;
 
     private ImageButton mGooglePaymentButton;
 
@@ -31,18 +47,79 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mGooglePaymentButton = findViewById(R.id.google_payment_button);
+
+        fetchAuthorization();
     }
 
     protected void reset() {
         mGooglePaymentButton.setVisibility(GONE);
     }
 
+    protected void fetchAuthorization() {
+        if (mAuthorization != null) {
+            setProgressBarIndeterminateVisibility(false);
+            onAuthorizationFetched();
+        }
+
+        String authType = Settings.getAuthorizationType(this);
+        if (authType.equals(getString(R.string.tokenization_key))) {
+            mAuthorization = Settings.getTokenizationKey(this);
+            setProgressBarIndeterminateVisibility(false);
+            onAuthorizationFetched();
+        }
+//        } else if (authType.equals(getString(R.string.client_token))) {
+//            merchant.fetchClientToken(this, new FetchClientTokenListener() {
+//                @Override
+//                public void onResult(@Nullable Exception error, @Nullable String clientToken) {
+//                    setProgressBarIndeterminateVisibility(false);
+//                    if (clientToken != null) {
+//                        mAuthorization = clientToken;
+//                        initializeBraintree(clientToken, RETURN_URL_SCHEME);
+//                    } else if (error != null) {
+//                        showDialog(error.getMessage());
+//                    }
+//                }
+//            });
+//        }
+    }
+
     protected void onAuthorizationFetched() {
         // TODO: move GooglePaymentActivity test to GooglePayment library
-//        try {
-//            mBraintreeFragment = BraintreeFragment.newInstance(this, mAuthorization);
-//        } catch (InvalidArgumentException e) {
-//            onError(e);
+        try {
+            googlePaymentClient = new GooglePaymentClient(BraintreeClient.newInstance(Authorization.fromString(mAuthorization), RETURN_URL_SCHEME));
+        } catch (InvalidArgumentException e) {
+            return;
+        }
+        googlePaymentClient.isReadyToPay(this, null, new ReadyToPayListener() {
+            @Override
+            public void onResult(Exception error, Boolean isReadyToPay) {
+                if (isReadyToPay) {
+                    mGooglePaymentButton.setVisibility(VISIBLE);
+                } else {
+//                        showDialog("Google Payments are not available. The following issues could be the cause:\n\n" +
+//                                "No user is logged in to the device.\n\n" +
+//                                "Google Play Services is missing or out of date.");
+                }
+            }
+        });
+//
+//        if (GooglePayCapabilities.isGooglePayEnabled(this, configuration.getGooglePayment())) {
+//            googlePaymentClient.isReadyToPay(this, null, new ReadyToPayListener() {
+//                @Override
+//                public void onResult(Exception error, Boolean isReadyToPay) {
+//                    if (isReadyToPay) {
+//                        mGooglePaymentButton.setVisibility(VISIBLE);
+//                    } else {
+////                        showDialog("Google Payments are not available. The following issues could be the cause:\n\n" +
+////                                "No user is logged in to the device.\n\n" +
+////                                "Google Play Services is missing or out of date.");
+//                    }
+//                }
+//            });
+//        } else {
+////            showDialog("Google Payments are not available. The following issues could be the cause:\n\n" +
+////                    "Google Payments are not enabled for the current merchant.\n\n" +
+////                    "Google Play Services is missing or out of date.");
 //        }
     }
 
@@ -106,30 +183,43 @@ public class MainActivity extends AppCompatActivity {
 //        });
     }
 
-//    public static String getDisplayString(GooglePaymentCardNonce nonce) {
-//        return "Underlying Card Last Two: " + nonce.getLastTwo() + "\n" +
-//                "Card Description: " + nonce.getDescription() + "\n" +
-//                "Email: " + nonce.getEmail() + "\n" +
-//                "Billing address: " + formatAddress(nonce.getBillingAddress()) + "\n" +
-//                "Shipping address: " + formatAddress(nonce.getShippingAddress()) + "\n" +
-//                getDisplayString(nonce.getBinData());
-//    }
-//
-//    private static String formatAddress(PostalAddress address) {
-//        if (address == null) {
-//            return "null";
-//        }
-//
-//        return address.getRecipientName() + " " +
-//                address.getStreetAddress() + " " +
-//                address.getExtendedAddress() + " " +
-//                address.getLocality() + " " +
-//                address.getRegion() + " " +
-//                address.getPostalCode() + " " +
-//                address.getSortingCode() + " " +
-//                address.getCountryCodeAlpha2() + " " +
-//                address.getPhoneNumber();
-//    }
+    public static String getDisplayString(GooglePaymentCardNonce nonce) {
+        return "Underlying Card Last Two: " + nonce.getLastTwo() + "\n" +
+                "Card Description: " + nonce.getDescription() + "\n" +
+                "Email: " + nonce.getEmail() + "\n" +
+                "Billing address: " + formatAddress(nonce.getBillingAddress()) + "\n" +
+                "Shipping address: " + formatAddress(nonce.getShippingAddress()) + "\n" +
+                getDisplayString(nonce.getBinData());
+    }
+
+    private static String formatAddress(PostalAddress address) {
+        if (address == null) {
+            return "null";
+        }
+
+        return address.getRecipientName() + " " +
+                address.getStreetAddress() + " " +
+                address.getExtendedAddress() + " " +
+                address.getLocality() + " " +
+                address.getRegion() + " " +
+                address.getPostalCode() + " " +
+                address.getSortingCode() + " " +
+                address.getCountryCodeAlpha2() + " " +
+                address.getPhoneNumber();
+    }
+
+    public static String getDisplayString(BinData binData) {
+        return "Bin Data: \n"  +
+                "         - Prepaid: " + binData.getHealthcare() + "\n" +
+                "         - Healthcare: " + binData.getHealthcare() + "\n" +
+                "         - Debit: " + binData.getDebit() + "\n" +
+                "         - Durbin Regulated: " + binData.getDurbinRegulated() + "\n" +
+                "         - Commercial: " + binData.getCommercial() + "\n" +
+                "         - Payroll: " + binData.getPayroll() + "\n" +
+                "         - Issuing Bank: " + binData.getIssuingBank() + "\n" +
+                "         - Country of Issuance: " + binData.getCountryOfIssuance() + "\n" +
+                "         - Product Id: " + binData.getProductId();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

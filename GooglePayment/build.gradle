@@ -35,15 +35,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.google.android.gms:play-services-wallet:16.0.1'
 
-    compileOnly("com.braintreepayments.api:braintree-core:$rootProject.braintreeVersion") {
-        exclude module: 'google-payment'
-        because 'Use this development version'
-    }
-
-    testImplementation("com.braintreepayments.api:braintree-core:$rootProject.braintreeVersion") {
-        exclude module: 'google-payment'
-        because 'Use this development version'
-    }
+    implementation "com.braintreepayments.api:braintree-core:4.0.0-SNAPSHOT"
 
     testImplementation 'androidx.test:rules:1.2.0'
     testImplementation 'androidx.test:runner:1.2.0'
@@ -55,8 +47,8 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4-rule:1.6.6'
     testImplementation 'org.robolectric:robolectric:4.3'
     testImplementation 'org.skyscreamer:jsonassert:1.4.0'
-    implementation "androidx.core:core-ktx:+"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    testImplementation "androidx.core:core-ktx:+"
+    testImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 // region signing and publishing
@@ -138,8 +130,6 @@ afterEvaluate {
         }
     }
 }
-repositories {
-    mavenCentral()
-}
+
 
 // endregion

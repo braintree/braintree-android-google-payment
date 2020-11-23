@@ -17,6 +17,7 @@
         android:adjustViewBounds="true"
         android:background="@android:color/transparent"
         android:contentDescription="Google Pay"
+        android:visibility="gone"
         android:onClick="launchGooglePayment" />
 
 </LinearLayout>

@@ -34,15 +34,9 @@ dependencies {
     api project(':GooglePayment')
 
     implementation 'com.google.android.gms:play-services-wallet:16.0.1'
-    compileOnly("com.braintreepayments.api:braintree-core:$rootProject.braintreeVersion") {
-        exclude module: 'google-payment'
-        because 'Use this development version'
-    }
 
-    testImplementation("com.braintreepayments.api:braintree-core:$rootProject.braintreeVersion") {
-        exclude module: 'google-payment'
-        because 'Use this development version'
-    }
+    implementation "com.braintreepayments.api:braintree-core:4.0.0-SNAPSHOT"
+
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
