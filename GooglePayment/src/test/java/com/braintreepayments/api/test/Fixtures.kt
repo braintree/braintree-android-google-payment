@@ -3,6 +3,28 @@ package com.braintreepayments.api.test
 object Fixtures {
 
     // language=JSON
+    const val CONFIGURATION_WITH_ANDROID_PAY = """
+        {
+          "clientApiUrl": "client_api_url",
+          "environment": "test",
+          "merchantId": "integration_merchant_id",
+          "merchantAccountId": "integration_merchant_account_id",
+          "androidPay": {
+            "enabled": true,
+            "displayName": "Android Pay Merchant",
+            "environment": "sandbox",
+            "googleAuthorizationFingerprint": "google-auth-fingerprint",
+            "supportedNetworks": [
+              "visa",
+              "mastercard",
+              "amex",
+              "discover"
+            ]
+          }
+        }
+    """
+
+    // language=JSON
     const val PAYMENT_METHODS_GOOGLE_PAY_CARD_RESPONSE = """
 {
   "apiVersion": 2,

@@ -68,7 +68,7 @@ public class GooglePaymentClient {
         braintreeClient.getConfiguration(activity, new ConfigurationListener() {
             @Override
             public void onConfigurationFetched(@Nullable Exception e, @Nullable Configuration configuration) {
-                if(!configuration.getGooglePayment().isEnabled(activity)) {
+                if(!configuration.getGooglePayment().isEnabled()) {
                     listener.onResult(null, false);
                 }
 
@@ -144,7 +144,7 @@ public class GooglePaymentClient {
         braintreeClient.getConfiguration(activity, new ConfigurationListener() {
             @Override
             public void onConfigurationFetched(@Nullable Exception e, @Nullable Configuration configuration) {
-                if(!configuration.getGooglePayment().isEnabled(activity)) {
+                if(!configuration.getGooglePayment().isEnabled()) {
                     listener.onResult(new BraintreeException("Google Pay enabled is not enabled for your Braintree account," +
                             " or Google Play Services are not configured correctly."), false);
                     return;
