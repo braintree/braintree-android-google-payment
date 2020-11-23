@@ -17,6 +17,7 @@ buildscript {
 
 plugins {
     id 'io.codearte.nexus-staging' version '0.21.2'
+    id 'de.marcphilipp.nexus-publish' version '0.4.0' apply false
 }
 
 version = '4.0.0-SNAPSHOT'
@@ -31,8 +32,8 @@ ext {
 allprojects {
     repositories {
         mavenLocal()
-        jcenter()
         google()
+        jcenter()
     }
 }
 

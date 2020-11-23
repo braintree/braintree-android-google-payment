@@ -365,6 +365,10 @@ public class GooglePaymentClient {
         return json;
     }
 
+    void onActivityResult(Context context, int resultCode, Intent data, GooglePaymentActivityResultListener listener) {
+
+    }
+
     private boolean validateManifest(Context context) {
         ActivityInfo activityInfo = braintreeClient.getManifestActivityInfo(context, GooglePaymentActivity.class);
         return activityInfo != null && activityInfo.getThemeResource() == R.style.bt_transparent_activity;
