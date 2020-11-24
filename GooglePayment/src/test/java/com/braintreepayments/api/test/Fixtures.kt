@@ -2,6 +2,8 @@ package com.braintreepayments.api.test
 
 object Fixtures {
 
+    const val TOKENIZATION_KEY = "sandbox_tmxhyf7d_dcpspy2brwdjr3qn"
+
     // language=JSON
     const val CONFIGURATION_WITH_ANDROID_PAY = """
         {
