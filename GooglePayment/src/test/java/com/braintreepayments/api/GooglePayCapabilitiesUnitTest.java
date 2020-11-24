@@ -51,9 +51,7 @@ public class GooglePayCapabilitiesUnitTest {
         mockStatic(GoogleApiAvailability.class);
         when(GoogleApiAvailability.getInstance()).thenReturn(mockGoogleApiAvailability);
 
-        GooglePayCapabilities sut = new GooglePayCapabilities();
-
-        assertTrue(sut.isGooglePayEnabled(activity, configuration.getGooglePayment()));
+        assertTrue(GooglePayCapabilities.isGooglePayEnabled(activity, configuration.getGooglePayment()));
     }
 
     @Test
@@ -73,9 +71,7 @@ public class GooglePayCapabilitiesUnitTest {
         mockStatic(GoogleApiAvailability.class);
         when(GoogleApiAvailability.getInstance()).thenReturn(mockGoogleApiAvailability);
 
-        GooglePayCapabilities sut = new GooglePayCapabilities();
-
-        assertFalse(sut.isGooglePayEnabled(activity, configuration.getGooglePayment()));
+        assertFalse(GooglePayCapabilities.isGooglePayEnabled(activity, configuration.getGooglePayment()));
     }
 
     @Test
@@ -95,8 +91,6 @@ public class GooglePayCapabilitiesUnitTest {
         mockStatic(GoogleApiAvailability.class);
         when(GoogleApiAvailability.getInstance()).thenReturn(mockGoogleApiAvailability);
 
-        GooglePayCapabilities sut = new GooglePayCapabilities();
-
-        assertFalse(sut.isGooglePayEnabled(activity, configuration.getGooglePayment()));
+        assertFalse(GooglePayCapabilities.isGooglePayEnabled(activity, configuration.getGooglePayment()));
     }
 }

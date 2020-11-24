@@ -10,7 +10,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.wallet.Wallet;
 
-// TODO: consider using method in GooglePaymentClient
+// TODO: reconsider location of this class and consider making non static
 public class GooglePayCapabilities {
 
     /**
@@ -19,7 +19,7 @@ public class GooglePayCapabilities {
      *         the user has Google Payment setup use
      *         {@link com.braintreepayments.api.GooglePaymentClient#isReadyToPay(FragmentActivity, ReadyForGooglePaymentRequest, ReadyToPayListener)}
      */
-    public boolean isGooglePayEnabled(Context context, GooglePaymentConfiguration googlePaymentConfiguration) {
+    public static boolean isGooglePayEnabled(Context context, GooglePaymentConfiguration googlePaymentConfiguration) {
         try {
             Class.forName(Wallet.class.getName());
 
