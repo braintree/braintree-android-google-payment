@@ -19,6 +19,7 @@ import com.braintreepayments.api.models.BraintreeRequestCodes;
 import com.braintreepayments.api.models.Configuration;
 import com.braintreepayments.api.models.GooglePaymentConfiguration;
 import com.braintreepayments.api.models.GooglePaymentRequest;
+import com.braintreepayments.api.models.MetadataBuilder;
 import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.braintreepayments.api.models.PaymentMethodNonceFactory;
 import com.braintreepayments.api.models.ReadyForGooglePaymentRequest;
@@ -30,6 +31,7 @@ import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
+import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
 import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
@@ -402,7 +404,38 @@ public class GooglePaymentClient {
             return WalletConstants.ENVIRONMENT_TEST;
         }
     }
-
+//
+//    PaymentMethodTokenizationParameters getTokenizationParameters(FragmentActivity activity, Configuration configuration) {
+//        String version;
+//
+//        JSONObject metadata = new MetadataBuilder()
+//                .integration(braintreeClient.getIntegrationType(activity))
+//                .sessionId(braintreeClient.getSessionId())
+//                .version()
+//                .build();
+//
+//        try {
+//            version = metadata.getString("version");
+//        } catch (JSONException e) {
+//            version = com.braintreepayments.api.BuildConfig.VERSION_NAME;
+//        }
+//
+//        PaymentMethodTokenizationParameters.Builder parameters = PaymentMethodTokenizationParameters.newBuilder()
+//                .setPaymentMethodTokenizationType(WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
+//                .addParameter("gateway", "braintree")
+//                .addParameter("braintree:merchantId", configuration.getMerchantId())
+//                .addParameter("braintree:authorizationFingerprint", configuration.getGooglePayment().getGoogleAuthorizationFingerprint())
+//                .addParameter("braintree:apiVersion", "v1")
+//                .addParameter("braintree:sdkVersion", version)
+//                .addParameter("braintree:metadata", metadata.toString());
+//
+//        if (braintreeClient.getAuthorization() instanceof TokenizationKey) {
+//            parameters.addParameter("braintree:clientKey", braintreeClient.getAuthorization().getBearer());
+//        }
+//
+//        return parameters.build();
+//    }
+//
     ArrayList<Integer> getAllowedCardNetworks(Configuration configuration) {
         ArrayList<Integer> allowedNetworks = new ArrayList<>();
         for (String network : configuration.getGooglePayment().getSupportedNetworks()) {

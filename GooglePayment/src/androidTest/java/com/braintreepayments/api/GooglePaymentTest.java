@@ -45,70 +45,8 @@ package com.braintreepayments.api;
 //
 //        mLatch.await();
 //    }
-//
-//    @Test(timeout = 5000)
-//    public void getTokenizationParameters_doesNotIncludeATokenizationKeyWhenNotPresent() {
-//        final BraintreeFragment fragment = getFragment(mActivityTestRule.getActivity(),
-//                base64Encode(Fixtures.CLIENT_TOKEN), mBaseConfiguration.build());
-//
-//        fragment.waitForConfiguration(new ConfigurationListener() {
-//            @Override
-//            public void onConfigurationFetched(Configuration configuration) {
-//                Bundle tokenizationParameters = GooglePayment.getTokenizationParameters(fragment).getParameters();
-//
-//                assertNull(tokenizationParameters.getString("braintree:clientKey"));
-//
-//                mLatch.countDown();
-//            }
-//        });
-//
-//        mLatch.countDown();
-//    }
-//
-//    @Test(timeout = 5000)
-//    public void getTokenizationParameters_includesATokenizationKeyWhenPresent() throws Exception {
-//        final BraintreeFragment fragment = getFragment(mActivityTestRule.getActivity(), Fixtures.TOKENIZATION_KEY,
-//                mBaseConfiguration.withAnalytics().build());
-//
-//        fragment.waitForConfiguration(new ConfigurationListener() {
-//            @Override
-//            public void onConfigurationFetched(Configuration configuration) {
-//                Bundle tokenizationParameters = GooglePayment.getTokenizationParameters(fragment).getParameters();
-//
-//                assertEquals(Fixtures.TOKENIZATION_KEY,  tokenizationParameters.getString("braintree:clientKey"));
-//
-//                mLatch.countDown();
-//            }
-//        });
-//
-//        mLatch.await();
-//    }
-//
-//    @Test(timeout = 5000)
-//    public void getAllowedCardNetworks_returnsSupportedNetworks() throws InterruptedException {
-//        String configuration = mBaseConfiguration.googlePayment(mBaseConfiguration.googlePayment()
-//                .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
-//                .build();
-//
-//        final BraintreeFragment fragment = getFragmentWithConfiguration(mActivityTestRule.getActivity(), configuration);
-//
-//        fragment.waitForConfiguration(new ConfigurationListener() {
-//            @Override
-//            public void onConfigurationFetched(Configuration configuration) {
-//                Collection<Integer> allowedCardNetworks = GooglePayment.getAllowedCardNetworks(fragment);
-//
-//                assertEquals(4, allowedCardNetworks.size());
-//                assertTrue(allowedCardNetworks.contains(CardNetwork.VISA));
-//                assertTrue(allowedCardNetworks.contains(CardNetwork.MASTERCARD));
-//                assertTrue(allowedCardNetworks.contains(CardNetwork.AMEX));
-//                assertTrue(allowedCardNetworks.contains(CardNetwork.DISCOVER));
-//
-//                mLatch.countDown();
-//            }
-//        });
-//
-//        mLatch.await();
-//    }
+
+
 //
 //    @Test(timeout = 5000)
 //    public void getTokenizationParameters_returnsCorrectParametersInCallback() throws Exception {
