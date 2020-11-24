@@ -9,8 +9,10 @@ import android.os.Bundle;
 import androidx.fragment.app.FragmentActivity;
 
 import com.braintreepayments.api.exceptions.BraintreeException;
+import com.braintreepayments.api.exceptions.GoogleApiClientException;
 import com.braintreepayments.api.exceptions.InvalidArgumentException;
 import com.braintreepayments.api.googlepayment.R;
+import com.braintreepayments.api.interfaces.TokenizationParametersListener;
 import com.braintreepayments.api.models.Authorization;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
 import com.braintreepayments.api.models.Configuration;
@@ -27,6 +29,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
+import com.google.android.gms.wallet.PaymentMethodTokenizationParameters;
 import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.ShippingAddressRequirements;
 import com.google.android.gms.wallet.TransactionInfo;
@@ -48,6 +51,7 @@ import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricTestRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -232,6 +236,37 @@ public class GooglePaymentClientUnitTest {
 
         sut.isReadyToPay(activity, null, readyToPayListener);
         verify(readyToPayListener).onResult(null, false);
+    }
+
+    @Test
+    public void isReadyToPay_whenActivityIsNull_forwardsErrorToListener() throws JSONException, InvalidArgumentException {
+        PaymentsClient mockPaymentsClient = mock(PaymentsClient.class);
+        when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(Tasks.forResult(true));
+
+        mockStatic(Wallet.class);
+        when(Wallet.getPaymentsClient(any(Activity.class), any(Wallet.WalletOptions.class))).thenReturn(mockPaymentsClient);
+
+        String configString = new TestConfigurationBuilder()
+                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder().enabled(true))
+                .build();
+
+        BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
+                .configuration(Configuration.fromJson(configString))
+                .authorization(Authorization.fromString(Fixtures.TOKENIZATION_KEY))
+                .activityInfo(activityInfo)
+                .build();
+
+        GooglePaymentClient sut = new GooglePaymentClient(braintreeClient);
+
+        sut.isReadyToPay(null, null, readyToPayListener);
+
+        ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
+        verify(readyToPayListener).onResult(captor.capture(), eq(false));
+
+        Exception exception = captor.getValue();
+        assertTrue(exception instanceof GoogleApiClientException);
+        assertEquals(GoogleApiClientException.ErrorType.NotAttachedToActivity, ((GoogleApiClientException) exception).getErrorType());
+        assertEquals(1, ((GoogleApiClientException) exception).getErrorCode());
     }
 
     @Test
@@ -926,6 +961,71 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
+    public void requestPayment_whenRequestIsNull_fowardsExceptionToListener() throws JSONException, InvalidArgumentException {
+        String configString = new TestConfigurationBuilder()
+                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                        .environment("sandbox")
+                        .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .paypalClientId("paypal-client-id-for-google-payment")
+                        .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
+                        .enabled(true))
+                .withAnalytics()
+                .build();
+
+        BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
+                .configuration(Configuration.fromJson(configString))
+                .authorization(Authorization.fromString("sandbox_tokenization_string"))
+                .activityInfo(activityInfo)
+                .build();
+
+        GooglePaymentClient sut = new GooglePaymentClient(braintreeClient);
+
+        sut.requestPayment(activity, null, requestPaymentListener);
+
+        verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.failed"));
+        ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
+        verify(requestPaymentListener).onResult(captor.capture(), eq(false));
+
+        Exception exception = captor.getValue();
+        assertTrue(exception instanceof BraintreeException);
+        assertEquals("Cannot pass null GooglePaymentRequest to requestPayment", exception.getMessage());
+    }
+
+    @Test
+    public void requestPayment_whenManifestInvalid_fowardsExceptionToListener() throws JSONException, InvalidArgumentException {
+        String configString = new TestConfigurationBuilder()
+                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                        .environment("sandbox")
+                        .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .paypalClientId("paypal-client-id-for-google-payment")
+                        .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
+                        .enabled(true))
+                .withAnalytics()
+                .build();
+
+        BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
+                .configuration(Configuration.fromJson(configString))
+                .authorization(Authorization.fromString("sandbox_tokenization_string"))
+                .activityInfo(null)
+                .build();
+
+        GooglePaymentClient sut = new GooglePaymentClient(braintreeClient);
+
+        GooglePaymentRequest googlePaymentRequest = new GooglePaymentRequest();
+        FragmentActivity activity = mock(FragmentActivity.class);
+        sut.requestPayment(activity, googlePaymentRequest, requestPaymentListener);
+
+        verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.failed"));
+        ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
+        verify(requestPaymentListener).onResult(captor.capture(), eq(false));
+
+        Exception exception = captor.getValue();
+        assertTrue(exception instanceof BraintreeException);
+        assertEquals("GooglePaymentActivity was not found in the Android " +
+                "manifest, or did not have a theme of R.style.bt_transparent_activity", exception.getMessage());
+    }
+
+    @Test
     public void onActivityResult_sendsAnalyticsEventOnCancel() throws JSONException, InvalidArgumentException {
         String configString = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
@@ -1100,6 +1200,32 @@ public class GooglePaymentClientUnitTest {
 
         Bundle tokenizationParameters = sut.getTokenizationParameters(activity, configuration).getParameters();
         assertEquals(Fixtures.TOKENIZATION_KEY, tokenizationParameters.getString("braintree:clientKey"));
+    }
+
+    @Test
+    public void getTokenizationParameters_forwardsParametersAndAllowedCardsToListener() throws JSONException, InvalidArgumentException {
+        String configString = new TestConfigurationBuilder()
+                .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
+                        .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
+                .withAnalytics()
+                .build();
+
+        Configuration configuration = Configuration.fromJson(configString);
+
+        BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
+                .configuration(configuration)
+                .authorization(Authorization.fromString(Fixtures.TOKENIZATION_KEY))
+                .activityInfo(activityInfo)
+                .build();
+
+        GooglePaymentClient sut = new GooglePaymentClient(braintreeClient);
+
+        TokenizationParametersListener tokenizationParametersListener = mock(TokenizationParametersListener.class);
+        sut.getTokenizationParameters(activity, tokenizationParametersListener);
+
+        // TODO: find a better way to assert on parameters
+        verify(tokenizationParametersListener).onResult(any(PaymentMethodTokenizationParameters.class), eq(sut.getAllowedCardNetworks(configuration)) );
     }
 
     private JSONObject getPaymentDataRequestJsonSentToGooglePayment(FragmentActivity activity) {
