@@ -15,12 +15,15 @@ import com.braintreepayments.api.exceptions.ErrorWithResponse;
 import com.braintreepayments.api.exceptions.GoogleApiClientException;
 import com.braintreepayments.api.exceptions.GooglePaymentException;
 import com.braintreepayments.api.googlepayment.R;
+import com.braintreepayments.api.interfaces.BraintreeResponseListener;
 import com.braintreepayments.api.interfaces.TokenizationParametersListener;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
 import com.braintreepayments.api.models.Configuration;
+import com.braintreepayments.api.models.GooglePaymentCardNonce;
 import com.braintreepayments.api.models.GooglePaymentConfiguration;
 import com.braintreepayments.api.models.GooglePaymentRequest;
 import com.braintreepayments.api.models.MetadataBuilder;
+import com.braintreepayments.api.models.PayPalAccountNonce;
 import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.braintreepayments.api.models.PaymentMethodNonceFactory;
 import com.braintreepayments.api.models.ReadyForGooglePaymentRequest;
@@ -29,6 +32,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wallet.AutoResolveHelper;
+import com.google.android.gms.wallet.CardRequirements;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
@@ -42,8 +46,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
-// TODO: Unit test analytics events and errors thrown
+/**
+ * Used to create and tokenize Google Payments payment methods. For more information see the
+ * <a href="https://developers.braintreepayments.com/guides/pay-with-google/overview">documentation</a>
+ */
 public class GooglePaymentClient {
 
     protected static final String EXTRA_ENVIRONMENT = "com.braintreepayments.api.EXTRA_ENVIRONMENT";
@@ -63,6 +71,31 @@ public class GooglePaymentClient {
         this.braintreeClient = braintreeClient;
     }
 
+    /**
+     * Before starting the Google Payments flow, use this method to check whether the
+     * Google Payment API is supported and set up on the device. When the listener is called with
+     * {@code true}, show the Google Payments button. When it is called with {@code false}, display other
+     * checkout options.
+     *
+     * @param activity {@link FragmentActivity}
+     * @param listener Instance of {@link ReadyToPayListener} to receive the
+     *                 isReadyToPay result.
+     */
+    public void isReadyToPay(final FragmentActivity activity, final ReadyToPayListener listener) {
+        isReadyToPay(activity, null, listener);
+    }
+
+    /**
+     * Before starting the Google Payments flow, use this method to check whether the
+     * Google Payment API is supported and set up on the device. When the listener is called with
+     * {@code true}, show the Google Payments button. When it is called with {@code false}, display other
+     * checkout options.
+     *
+     * @param activity {@link FragmentActivity}
+     * @param request {@link ReadyForGooglePaymentRequest}
+     * @param listener Instance of {@link ReadyToPayListener} to receive the
+     *                 isReadyToPay result.
+     */
     public void isReadyToPay(final FragmentActivity activity, final ReadyForGooglePaymentRequest request, final ReadyToPayListener listener) {
 
         try {
@@ -126,6 +159,37 @@ public class GooglePaymentClient {
         });
     }
 
+    /**
+     * Get Braintree specific tokenization parameters for a Google Payment. Useful for when full control over the
+     * {@link PaymentDataRequest} is required.
+     *
+     * {@link PaymentMethodTokenizationParameters} should be supplied to the
+     * {@link PaymentDataRequest} via
+     * {@link PaymentDataRequest.Builder#setPaymentMethodTokenizationParameters(PaymentMethodTokenizationParameters)}
+     * and {@link Collection <Integer>} allowedCardNetworks should be supplied to the
+     * {@link CardRequirements} via
+     * {@link CardRequirements.Builder#addAllowedCardNetworks(Collection)}}.
+     *
+     * @param activity {@link FragmentActivity}
+     * @param listener Instance of {@link TokenizationParametersListener} to receive the
+     *                 {@link PaymentMethodTokenizationParameters}.
+     */
+    public void getTokenizationParameters(final FragmentActivity activity, final TokenizationParametersListener listener) {
+        braintreeClient.getConfiguration(activity, new ConfigurationListener() {
+            @Override
+            public void onConfigurationFetched(@Nullable Exception e, @Nullable Configuration configuration) {
+                listener.onResult(getTokenizationParameters(activity, configuration), getAllowedCardNetworks(configuration));
+            }
+        });
+    }
+
+    /**
+     * Launch a Google Payments request. This method will show the payment instrument chooser to the user.
+     *
+     * @param activity {@link FragmentActivity}
+     * @param request  The {@link GooglePaymentRequest} containing options for the transaction.
+     * @param listener Instance of {@link RequestPaymentListener} to receive the result.
+     */
     public void requestPayment(final FragmentActivity activity, final GooglePaymentRequest request, final RequestPaymentListener listener) {
         braintreeClient.sendAnalyticsEvent(activity, "google-payment.selected");
 
@@ -172,15 +236,15 @@ public class GooglePaymentClient {
 
     }
 
-    public void getTokenizationParameters(final FragmentActivity activity, final TokenizationParametersListener listener) {
-        braintreeClient.getConfiguration(activity, new ConfigurationListener() {
-            @Override
-            public void onConfigurationFetched(@Nullable Exception e, @Nullable Configuration configuration) {
-                listener.onResult(getTokenizationParameters(activity, configuration), getAllowedCardNetworks(configuration));
-            }
-        });
-    }
-
+    /**
+     * Call this method when you've received a successful {@link PaymentData} response in your
+     * activity or fragment's {@code onActivityResult} method to get a {@link GooglePaymentCardNonce}
+     * or {@link PayPalAccountNonce}.
+     *
+     * @param activity {@link FragmentActivity}
+     * @param paymentData {@link PaymentData} from the Intent in {@code onActivityResult} method.
+     * @param listener Instance of {@link TokenizationListener} to receive the result.
+     */
     public void tokenize(FragmentActivity activity, PaymentData paymentData, TokenizationListener listener) {
         try {
             listener.onResult(null, PaymentMethodNonceFactory.fromString(paymentData.toJson()));
