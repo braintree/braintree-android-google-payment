@@ -263,60 +263,113 @@ public class GooglePaymentClient {
         }
     }
 
-    private void setGooglePaymentRequestDefaults(FragmentActivity activity, Configuration configuration,
-                                                        GooglePaymentRequest request) {
-        if (request.isEmailRequired() == null) {
-            request.emailRequired(false);
+    void onActivityResult(FragmentActivity activity, int resultCode, Intent data, final GooglePaymentActivityResultListener listener) {
+        if (resultCode == AppCompatActivity.RESULT_OK) {
+            braintreeClient.sendAnalyticsEvent(activity,"google-payment.authorized");
+            tokenize(activity, PaymentData.getFromIntent(data), new TokenizationListener() {
+                @Override
+                public void onResult(Exception error, PaymentMethodNonce paymentMethodNonce) {
+                    // TODO: confirm handling of result
+                    listener.onResult(error, paymentMethodNonce);
+                }
+            });
+        } else if (resultCode == AutoResolveHelper.RESULT_ERROR) {
+            braintreeClient.sendAnalyticsEvent(activity,"google-payment.failed");
+
+            listener.onResult(new GooglePaymentException("An error was encountered during the Google Payments " +
+                    "flow. See the status object in this exception for more details.",
+                    AutoResolveHelper.getStatusFromIntent(data)), null);
+        } else if (resultCode == AppCompatActivity.RESULT_CANCELED) {
+            braintreeClient.sendAnalyticsEvent(activity,"google-payment.canceled");
+        }
+    }
+
+    int getEnvironment(GooglePaymentConfiguration configuration) {
+        if ("production".equals(configuration.getEnvironment())) {
+            return WalletConstants.ENVIRONMENT_PRODUCTION;
+        } else {
+            return WalletConstants.ENVIRONMENT_TEST;
+        }
+    }
+
+    PaymentMethodTokenizationParameters getTokenizationParameters(FragmentActivity activity, Configuration configuration) {
+        String version;
+
+        JSONObject metadata = new MetadataBuilder()
+                .integration(braintreeClient.getIntegrationType(activity))
+                .sessionId(braintreeClient.getSessionId())
+                .version()
+                .build();
+
+        try {
+            version = metadata.getString("version");
+        } catch (JSONException e) {
+            version = com.braintreepayments.api.BuildConfig.VERSION_NAME;
         }
 
-        if (request.isPhoneNumberRequired() == null) {
-            request.phoneNumberRequired(false);
+        PaymentMethodTokenizationParameters.Builder parameters = PaymentMethodTokenizationParameters.newBuilder()
+                .setPaymentMethodTokenizationType(WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
+                .addParameter("gateway", "braintree")
+                .addParameter("braintree:merchantId", configuration.getMerchantId())
+                .addParameter("braintree:authorizationFingerprint", configuration.getGooglePayment().getGoogleAuthorizationFingerprint())
+                .addParameter("braintree:apiVersion", "v1")
+                .addParameter("braintree:sdkVersion", version)
+                .addParameter("braintree:metadata", metadata.toString());
+
+        if (braintreeClient.getAuthorization() instanceof TokenizationKey) {
+            parameters.addParameter("braintree:clientKey", braintreeClient.getAuthorization().getBearer());
         }
 
-        if (request.isBillingAddressRequired() == null) {
-            request.billingAddressRequired(false);
-        }
+        return parameters.build();
+    }
 
-        if (request.isBillingAddressRequired() &&
-                request.getBillingAddressFormat() == null) {
-            request.billingAddressFormat(WalletConstants.BILLING_ADDRESS_FORMAT_MIN);
-        }
-
-        if (request.isShippingAddressRequired() == null) {
-            request.shippingAddressRequired(false);
-        }
-
-        if (request.getAllowPrepaidCards() == null) {
-            request.allowPrepaidCards(true);
-        }
-
-        if (request.getAllowedPaymentMethod(CARD_PAYMENT_TYPE) == null) {
-            request.setAllowedPaymentMethod(CARD_PAYMENT_TYPE,
-                    buildCardPaymentMethodParameters(request, configuration));
-        }
-
-        if (request.getTokenizationSpecificationForType(CARD_PAYMENT_TYPE) == null) {
-            request.setTokenizationSpecificationForType("CARD",
-                    buildCardTokenizationSpecification(activity, configuration));
-        }
-
-        boolean googlePaymentCanProcessPayPal = request.isPayPalEnabled() &&
-                !TextUtils.isEmpty(configuration.getGooglePayment().getPaypalClientId());
-
-        if (googlePaymentCanProcessPayPal) {
-            if (request.getAllowedPaymentMethod("PAYPAL") == null) {
-                request.setAllowedPaymentMethod(PAYPAL_PAYMENT_TYPE,
-                        buildPayPalPaymentMethodParameters(configuration));
+    ArrayList<Integer> getAllowedCardNetworks(Configuration configuration) {
+        ArrayList<Integer> allowedNetworks = new ArrayList<>();
+        for (String network : configuration.getGooglePayment().getSupportedNetworks()) {
+            switch (network) {
+                case VISA_NETWORK:
+                    allowedNetworks.add(WalletConstants.CARD_NETWORK_VISA);
+                    break;
+                case MASTERCARD_NETWORK:
+                    allowedNetworks.add(WalletConstants.CARD_NETWORK_MASTERCARD);
+                    break;
+                case AMEX_NETWORK:
+                    allowedNetworks.add(WalletConstants.CARD_NETWORK_AMEX);
+                    break;
+                case DISCOVER_NETWORK:
+                    allowedNetworks.add(WalletConstants.CARD_NETWORK_DISCOVER);
+                    break;
+                default:
+                    break;
             }
-
-
-            if (request.getTokenizationSpecificationForType(PAYPAL_PAYMENT_TYPE) == null) {
-                request.setTokenizationSpecificationForType("PAYPAL",
-                        buildPayPalTokenizationSpecification(activity, configuration));
-            }
         }
 
-        request.environment(configuration.getGooglePayment().getEnvironment());
+        return allowedNetworks;
+    }
+
+    private JSONArray buildCardNetworks(Configuration configuration) {
+        JSONArray cardNetworkStrings = new JSONArray();
+
+        for (int network : getAllowedCardNetworks(configuration)) {
+            switch (network) {
+                case WalletConstants.CARD_NETWORK_AMEX:
+                    cardNetworkStrings.put("AMEX");
+                    break;
+                case WalletConstants.CARD_NETWORK_DISCOVER:
+                    cardNetworkStrings.put("DISCOVER");
+                    break;
+                case WalletConstants.CARD_NETWORK_JCB:
+                    cardNetworkStrings.put("JCB");
+                    break;
+                case WalletConstants.CARD_NETWORK_MASTERCARD:
+                    cardNetworkStrings.put("MASTERCARD");
+                    break;
+                case WalletConstants.CARD_NETWORK_VISA:
+                    cardNetworkStrings.put("VISA");
+                    break;
+            }
+        }
+        return cardNetworkStrings;
     }
 
     private JSONObject buildCardPaymentMethodParameters(GooglePaymentRequest request, Configuration configuration) {
@@ -444,117 +497,64 @@ public class GooglePaymentClient {
         return json;
     }
 
-    void onActivityResult(FragmentActivity activity, int resultCode, Intent data, final GooglePaymentActivityResultListener listener) {
-        if (resultCode == AppCompatActivity.RESULT_OK) {
-            braintreeClient.sendAnalyticsEvent(activity,"google-payment.authorized");
-            tokenize(activity, PaymentData.getFromIntent(data), new TokenizationListener() {
-                @Override
-                public void onResult(Exception error, PaymentMethodNonce paymentMethodNonce) {
-                    // TODO: confirm handling of result
-                    listener.onResult(error, paymentMethodNonce);
-                }
-            });
-        } else if (resultCode == AutoResolveHelper.RESULT_ERROR) {
-            braintreeClient.sendAnalyticsEvent(activity,"google-payment.failed");
-
-            listener.onResult(new GooglePaymentException("An error was encountered during the Google Payments " +
-                    "flow. See the status object in this exception for more details.",
-                    AutoResolveHelper.getStatusFromIntent(data)), null);
-        } else if (resultCode == AppCompatActivity.RESULT_CANCELED) {
-            braintreeClient.sendAnalyticsEvent(activity,"google-payment.canceled");
+    private void setGooglePaymentRequestDefaults(FragmentActivity activity, Configuration configuration,
+                                                        GooglePaymentRequest request) {
+        if (request.isEmailRequired() == null) {
+            request.emailRequired(false);
         }
+
+        if (request.isPhoneNumberRequired() == null) {
+            request.phoneNumberRequired(false);
+        }
+
+        if (request.isBillingAddressRequired() == null) {
+            request.billingAddressRequired(false);
+        }
+
+        if (request.isBillingAddressRequired() &&
+                request.getBillingAddressFormat() == null) {
+            request.billingAddressFormat(WalletConstants.BILLING_ADDRESS_FORMAT_MIN);
+        }
+
+        if (request.isShippingAddressRequired() == null) {
+            request.shippingAddressRequired(false);
+        }
+
+        if (request.getAllowPrepaidCards() == null) {
+            request.allowPrepaidCards(true);
+        }
+
+        if (request.getAllowedPaymentMethod(CARD_PAYMENT_TYPE) == null) {
+            request.setAllowedPaymentMethod(CARD_PAYMENT_TYPE,
+                    buildCardPaymentMethodParameters(request, configuration));
+        }
+
+        if (request.getTokenizationSpecificationForType(CARD_PAYMENT_TYPE) == null) {
+            request.setTokenizationSpecificationForType("CARD",
+                    buildCardTokenizationSpecification(activity, configuration));
+        }
+
+        boolean googlePaymentCanProcessPayPal = request.isPayPalEnabled() &&
+                !TextUtils.isEmpty(configuration.getGooglePayment().getPaypalClientId());
+
+        if (googlePaymentCanProcessPayPal) {
+            if (request.getAllowedPaymentMethod("PAYPAL") == null) {
+                request.setAllowedPaymentMethod(PAYPAL_PAYMENT_TYPE,
+                        buildPayPalPaymentMethodParameters(configuration));
+            }
+
+
+            if (request.getTokenizationSpecificationForType(PAYPAL_PAYMENT_TYPE) == null) {
+                request.setTokenizationSpecificationForType("PAYPAL",
+                        buildPayPalTokenizationSpecification(activity, configuration));
+            }
+        }
+
+        request.environment(configuration.getGooglePayment().getEnvironment());
     }
 
     private boolean validateManifest(Context context) {
         ActivityInfo activityInfo = braintreeClient.getManifestActivityInfo(context, GooglePaymentActivity.class);
         return activityInfo != null && activityInfo.getThemeResource() == R.style.bt_transparent_activity;
-    }
-
-    int getEnvironment(GooglePaymentConfiguration configuration) {
-        if ("production".equals(configuration.getEnvironment())) {
-            return WalletConstants.ENVIRONMENT_PRODUCTION;
-        } else {
-            return WalletConstants.ENVIRONMENT_TEST;
-        }
-    }
-
-    PaymentMethodTokenizationParameters getTokenizationParameters(FragmentActivity activity, Configuration configuration) {
-        String version;
-
-        JSONObject metadata = new MetadataBuilder()
-                .integration(braintreeClient.getIntegrationType(activity))
-                .sessionId(braintreeClient.getSessionId())
-                .version()
-                .build();
-
-        try {
-            version = metadata.getString("version");
-        } catch (JSONException e) {
-            version = com.braintreepayments.api.BuildConfig.VERSION_NAME;
-        }
-
-        PaymentMethodTokenizationParameters.Builder parameters = PaymentMethodTokenizationParameters.newBuilder()
-                .setPaymentMethodTokenizationType(WalletConstants.PAYMENT_METHOD_TOKENIZATION_TYPE_PAYMENT_GATEWAY)
-                .addParameter("gateway", "braintree")
-                .addParameter("braintree:merchantId", configuration.getMerchantId())
-                .addParameter("braintree:authorizationFingerprint", configuration.getGooglePayment().getGoogleAuthorizationFingerprint())
-                .addParameter("braintree:apiVersion", "v1")
-                .addParameter("braintree:sdkVersion", version)
-                .addParameter("braintree:metadata", metadata.toString());
-
-        if (braintreeClient.getAuthorization() instanceof TokenizationKey) {
-            parameters.addParameter("braintree:clientKey", braintreeClient.getAuthorization().getBearer());
-        }
-
-        return parameters.build();
-    }
-
-    ArrayList<Integer> getAllowedCardNetworks(Configuration configuration) {
-        ArrayList<Integer> allowedNetworks = new ArrayList<>();
-        for (String network : configuration.getGooglePayment().getSupportedNetworks()) {
-            switch (network) {
-                case VISA_NETWORK:
-                    allowedNetworks.add(WalletConstants.CARD_NETWORK_VISA);
-                    break;
-                case MASTERCARD_NETWORK:
-                    allowedNetworks.add(WalletConstants.CARD_NETWORK_MASTERCARD);
-                    break;
-                case AMEX_NETWORK:
-                    allowedNetworks.add(WalletConstants.CARD_NETWORK_AMEX);
-                    break;
-                case DISCOVER_NETWORK:
-                    allowedNetworks.add(WalletConstants.CARD_NETWORK_DISCOVER);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        return allowedNetworks;
-    }
-
-    private JSONArray buildCardNetworks(Configuration configuration) {
-        JSONArray cardNetworkStrings = new JSONArray();
-
-        for (int network : getAllowedCardNetworks(configuration)) {
-            switch (network) {
-                case WalletConstants.CARD_NETWORK_AMEX:
-                    cardNetworkStrings.put("AMEX");
-                    break;
-                case WalletConstants.CARD_NETWORK_DISCOVER:
-                    cardNetworkStrings.put("DISCOVER");
-                    break;
-                case WalletConstants.CARD_NETWORK_JCB:
-                    cardNetworkStrings.put("JCB");
-                    break;
-                case WalletConstants.CARD_NETWORK_MASTERCARD:
-                    cardNetworkStrings.put("MASTERCARD");
-                    break;
-                case WalletConstants.CARD_NETWORK_VISA:
-                    cardNetworkStrings.put("VISA");
-                    break;
-            }
-        }
-        return cardNetworkStrings;
     }
 }
