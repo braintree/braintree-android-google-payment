@@ -19,63 +19,7 @@ package com.braintreepayments.api;
 //                        .googleAuthorizationFingerprint("google-auth-fingerprint"))
 //                .merchantId("android-pay-merchant-id");
 //    }
-//
 
-
-//    @Test
-//    public void requestPayment_sendsAnalyticsEvent() {
-//        BraintreeFragment fragment = getSetupFragment();
-//        GooglePaymentRequest googlePaymentRequest = new GooglePaymentRequest()
-//                .transactionInfo(TransactionInfo.newBuilder()
-//                        .setTotalPrice("1.00")
-//                        .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
-//                        .setCurrencyCode("USD")
-//                        .build());
-//
-//        GooglePayment.requestPayment(fragment, googlePaymentRequest);
-//
-//        InOrder order = inOrder(fragment);
-//        order.verify(fragment).sendAnalyticsEvent("google-payment.selected");
-//        order.verify(fragment).sendAnalyticsEvent("google-payment.started");
-//    }
-//
-//    @Test
-//    public void requestPayment_postsExceptionWhenTransactionInfoIsNull() {
-//        BraintreeFragment fragment = getSetupFragment();
-//
-//        GooglePayment.requestPayment(fragment, null);
-//
-//        InOrder order = inOrder(fragment);
-//        order.verify(fragment).sendAnalyticsEvent("google-payment.selected");
-//        order.verify(fragment).sendAnalyticsEvent("google-payment.failed");
-//    }
-//
-//    @Test
-//    public void onActivityResult_sendsAnalyticsEventOnCancel() {
-//        BraintreeFragment fragment = getSetupFragment();
-//
-//        GooglePayment.onActivityResult(fragment, RESULT_CANCELED, new Intent());
-//
-//        verify(fragment).sendAnalyticsEvent("google-payment.canceled");
-//    }
-//
-//    @Test
-//    public void onActivityResult_sendsAnalyticsEventOnNonOkOrCanceledResult() {
-//        BraintreeFragment fragment = getSetupFragment();
-//
-//        GooglePayment.onActivityResult(fragment, RESULT_FIRST_USER, new Intent());
-//
-//        verify(fragment).sendAnalyticsEvent("google-payment.failed");
-//    }
-//
-//    @Test
-//    public void onActivityResult_sendsAnalyticsEventOnOkResponse() {
-//        BraintreeFragment fragment = getSetupFragment();
-//
-//        GooglePayment.onActivityResult(fragment, RESULT_OK, new Intent());
-//
-//        verify(fragment).sendAnalyticsEvent("google-payment.authorized");
-//    }
 //
 //    @Test(timeout = 5000)
 //    public void getTokenizationParameters_returnsCorrectParameters() throws Exception {

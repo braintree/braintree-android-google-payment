@@ -7,22 +7,26 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
 import com.braintreepayments.api.exceptions.BraintreeException;
 import com.braintreepayments.api.exceptions.ErrorWithResponse;
 import com.braintreepayments.api.exceptions.GoogleApiClientException;
+import com.braintreepayments.api.exceptions.GooglePaymentException;
 import com.braintreepayments.api.googlepayment.R;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
 import com.braintreepayments.api.models.Configuration;
 import com.braintreepayments.api.models.GooglePaymentConfiguration;
 import com.braintreepayments.api.models.GooglePaymentRequest;
+import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.braintreepayments.api.models.PaymentMethodNonceFactory;
 import com.braintreepayments.api.models.ReadyForGooglePaymentRequest;
 import com.braintreepayments.api.models.TokenizationKey;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
 import com.google.android.gms.wallet.PaymentData;
 import com.google.android.gms.wallet.PaymentDataRequest;
@@ -365,8 +369,25 @@ public class GooglePaymentClient {
         return json;
     }
 
-    void onActivityResult(Context context, int resultCode, Intent data, GooglePaymentActivityResultListener listener) {
+    void onActivityResult(FragmentActivity activity, int resultCode, Intent data, final GooglePaymentActivityResultListener listener) {
+        if (resultCode == AppCompatActivity.RESULT_OK) {
+            braintreeClient.sendAnalyticsEvent(activity,"google-payment.authorized");
+            tokenize(activity, PaymentData.getFromIntent(data), new TokenizationListener() {
+                @Override
+                public void onResult(Exception error, PaymentMethodNonce paymentMethodNonce) {
+                    // TODO: confirm handling of result
+                    listener.onResult(error, paymentMethodNonce);
+                }
+            });
+        } else if (resultCode == AutoResolveHelper.RESULT_ERROR) {
+            braintreeClient.sendAnalyticsEvent(activity,"google-payment.failed");
 
+            listener.onResult(new GooglePaymentException("An error was encountered during the Google Payments " +
+                    "flow. See the status object in this exception for more details.",
+                    AutoResolveHelper.getStatusFromIntent(data)), null);
+        } else if (resultCode == AppCompatActivity.RESULT_CANCELED) {
+            braintreeClient.sendAnalyticsEvent(activity,"google-payment.canceled");
+        }
     }
 
     private boolean validateManifest(Context context) {
