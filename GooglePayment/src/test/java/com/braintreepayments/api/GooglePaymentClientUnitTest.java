@@ -1179,7 +1179,6 @@ public class GooglePaymentClientUnitTest {
         GooglePaymentGetTokenizationParametersCallback getTokenizationParametersCallback = mock(GooglePaymentGetTokenizationParametersCallback.class);
         sut.getTokenizationParameters(activity, getTokenizationParametersCallback);
 
-        // TODO: find a better way to assert on parameters
         verify(getTokenizationParametersCallback).onResult(any(PaymentMethodTokenizationParameters.class), eq(sut.getAllowedCardNetworks(configuration)) );
     }
 
