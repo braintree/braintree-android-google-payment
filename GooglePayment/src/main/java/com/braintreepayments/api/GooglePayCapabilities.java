@@ -10,7 +10,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.wallet.Wallet;
 
-// TODO: reconsider location of this class and consider making non static
 public class GooglePayCapabilities {
 
     /**
