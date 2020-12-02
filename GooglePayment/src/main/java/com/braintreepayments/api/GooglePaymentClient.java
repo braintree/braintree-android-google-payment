@@ -104,9 +104,9 @@ public class GooglePaymentClient {
             return;
         }
 
-        braintreeClient.getConfiguration(activity, new ConfigurationListener() {
+        braintreeClient.getConfiguration(activity, new ConfigurationCallback() {
             @Override
-            public void onConfigurationFetched(@Nullable Exception e, @Nullable Configuration configuration) {
+            public void onResult(@Nullable Configuration configuration, @Nullable Exception e) {
                 if(!configuration.getGooglePayment().isEnabled()) {
                     listener.onResult(null, false);
                 }
@@ -174,9 +174,9 @@ public class GooglePaymentClient {
      *                 {@link PaymentMethodTokenizationParameters}.
      */
     public void getTokenizationParameters(final FragmentActivity activity, final TokenizationParametersListener listener) {
-        braintreeClient.getConfiguration(activity, new ConfigurationListener() {
+        braintreeClient.getConfiguration(activity, new ConfigurationCallback() {
             @Override
-            public void onConfigurationFetched(@Nullable Exception e, @Nullable Configuration configuration) {
+            public void onResult(@Nullable Configuration configuration, @Nullable Exception e) {
                 listener.onResult(getTokenizationParameters(activity, configuration), getAllowedCardNetworks(configuration));
             }
         });
@@ -211,9 +211,9 @@ public class GooglePaymentClient {
             return;
         }
 
-        braintreeClient.getConfiguration(activity, new ConfigurationListener() {
+        braintreeClient.getConfiguration(activity, new ConfigurationCallback() {
             @Override
-            public void onConfigurationFetched(@Nullable Exception e, @Nullable Configuration configuration) {
+            public void onResult(@Nullable Configuration configuration, @Nullable Exception e) {
                 if(!configuration.getGooglePayment().isEnabled()) {
                     listener.onResult(new BraintreeException("Google Pay enabled is not enabled for your Braintree account," +
                             " or Google Play Services are not configured correctly."), false);
