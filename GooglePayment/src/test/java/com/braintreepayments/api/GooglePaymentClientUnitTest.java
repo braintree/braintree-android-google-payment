@@ -86,7 +86,6 @@ public class GooglePaymentClientUnitTest {
 
     private GooglePaymentIsReadyToPayCallback readyToPayCallback;
     private GooglePaymentRequestPaymentCallback requestPaymentCallback;
-    private GooglePaymentTokenizeCallback tokenizeCallback;
     private GooglePaymentOnActivityResultCallback activityResultCallback;
 
     private ActivityInfo activityInfo;
@@ -99,7 +98,6 @@ public class GooglePaymentClientUnitTest {
         braintreeClient = mock(BraintreeClient.class);
         readyToPayCallback = mock(GooglePaymentIsReadyToPayCallback.class);
         requestPaymentCallback = mock(GooglePaymentRequestPaymentCallback.class);
-        tokenizeCallback = mock(GooglePaymentTokenizeCallback.class);
         activityResultCallback = mock(GooglePaymentOnActivityResultCallback.class);
         activityInfo = mock(ActivityInfo.class);
 
@@ -917,10 +915,10 @@ public class GooglePaymentClientUnitTest {
 
         GooglePaymentClient sut = new GooglePaymentClient(braintreeClient);
 
-        sut.tokenize(activity, pd, tokenizeCallback);
+        sut.tokenize(activity, pd, activityResultCallback);
 
         ArgumentCaptor<PaymentMethodNonce> captor = ArgumentCaptor.forClass(PaymentMethodNonce.class);
-        verify(tokenizeCallback).onResult(captor.capture(), (Exception)isNull());
+        verify(activityResultCallback).onResult(captor.capture(), (Exception)isNull());
 
         assertTrue(captor.getValue() instanceof GooglePaymentCardNonce);
     }
@@ -949,10 +947,10 @@ public class GooglePaymentClientUnitTest {
 
         GooglePaymentClient sut = new GooglePaymentClient(braintreeClient);
 
-        sut.tokenize(activity, pd, tokenizeCallback);
+        sut.tokenize(activity, pd, activityResultCallback);
 
         ArgumentCaptor<PaymentMethodNonce> captor = ArgumentCaptor.forClass(PaymentMethodNonce.class);
-        verify(tokenizeCallback).onResult(captor.capture(), (Exception)isNull());
+        verify(activityResultCallback).onResult(captor.capture(), (Exception)isNull());
 
         assertTrue(captor.getValue() instanceof PayPalAccountNonce);
     }

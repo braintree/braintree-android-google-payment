@@ -239,9 +239,9 @@ public class GooglePaymentClient {
      *
      * @param activity {@link FragmentActivity}
      * @param paymentData {@link PaymentData} from the Intent in {@code onActivityResult} method.
-     * @param callback Instance of {@link GooglePaymentTokenizeCallback} to receive the result.
+     * @param callback Instance of {@link GooglePaymentOnActivityResultCallback} to receive the result.
      */
-    public void tokenize(FragmentActivity activity, PaymentData paymentData, GooglePaymentTokenizeCallback callback) {
+    public void tokenize(FragmentActivity activity, PaymentData paymentData, GooglePaymentOnActivityResultCallback callback) {
         try {
             callback.onResult(PaymentMethodNonceFactory.fromString(paymentData.toJson()), null);
             braintreeClient.sendAnalyticsEvent(activity, "google-payment.nonce-received");
@@ -263,13 +263,7 @@ public class GooglePaymentClient {
     void onActivityResult(FragmentActivity activity, int resultCode, Intent data, final GooglePaymentOnActivityResultCallback callback) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
             braintreeClient.sendAnalyticsEvent(activity,"google-payment.authorized");
-            tokenize(activity, PaymentData.getFromIntent(data), new GooglePaymentTokenizeCallback() {
-                @Override
-                public void onResult(PaymentMethodNonce paymentMethodNonce, Exception error) {
-                    // TODO: confirm handling of result
-                    callback.onResult(paymentMethodNonce, error);
-                }
-            });
+            tokenize(activity, PaymentData.getFromIntent(data), callback);
         } else if (resultCode == AutoResolveHelper.RESULT_ERROR) {
             braintreeClient.sendAnalyticsEvent(activity,"google-payment.failed");
 
