@@ -12,10 +12,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.braintreepayments.api.exceptions.BraintreeException;
 import com.braintreepayments.api.exceptions.ErrorWithResponse;
-import com.braintreepayments.api.exceptions.GoogleApiClientException;
-import com.braintreepayments.api.exceptions.GooglePaymentException;
 import com.braintreepayments.api.googlepayment.R;
-import com.braintreepayments.api.interfaces.TokenizationParametersListener;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
 import com.braintreepayments.api.models.Configuration;
 import com.braintreepayments.api.models.GooglePaymentCardNonce;
