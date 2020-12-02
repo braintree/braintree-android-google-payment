@@ -8,7 +8,7 @@ import java.util.Collection;
  * Interface for receiving {@link PaymentMethodTokenizationParameters} and
  * {@link Collection<Integer>} allowedCardNetworks.
  */
-public interface TokenizationParametersListener {
+public interface GooglePaymentGetTokenizationParametersCallback {
 
     /**
      * Called when tokenization parameters for Android Pay are available.Useful for existing Google

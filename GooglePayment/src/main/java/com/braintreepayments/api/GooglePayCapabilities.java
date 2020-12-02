@@ -16,7 +16,7 @@ public class GooglePayCapabilities {
      * @return {@code true} if Google Payment is enabled and supported in the current environment,
      *         {@code false} otherwise. Note: this value only pertains to the Braintree configuration, to check if
      *         the user has Google Payment setup use
-     *         {@link com.braintreepayments.api.GooglePaymentClient#isReadyToPay(FragmentActivity, ReadyForGooglePaymentRequest, ReadyToPayListener)}
+     *         {@link com.braintreepayments.api.GooglePaymentClient#isReadyToPay(FragmentActivity, ReadyForGooglePaymentRequest, GooglePaymentIsReadyToPayCallback)}
      */
     public static boolean isGooglePayEnabled(Context context, GooglePaymentConfiguration googlePaymentConfiguration) {
         try {
