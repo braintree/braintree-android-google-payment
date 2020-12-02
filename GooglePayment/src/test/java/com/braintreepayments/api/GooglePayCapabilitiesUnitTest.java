@@ -28,7 +28,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(RobolectricTestRunner.class)
 @PrepareForTest({GoogleApiAvailability.class, Wallet.class})
-@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*"})
+@PowerMockIgnore({"org.mockito.*", "org.robolectric.*", "android.*", "androidx.*"})
 public class GooglePayCapabilitiesUnitTest {
 
     @Rule

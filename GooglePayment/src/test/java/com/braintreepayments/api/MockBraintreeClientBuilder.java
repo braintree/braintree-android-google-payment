@@ -45,13 +45,13 @@ public class MockBraintreeClientBuilder {
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) {
-                ConfigurationListener callback = (ConfigurationListener) invocation.getArguments()[1];
+                ConfigurationCallback callback = (ConfigurationCallback) invocation.getArguments()[1];
                 if (configuration != null) {
-                    callback.onConfigurationFetched(null, configuration);
+                    callback.onResult(configuration, null);
                 }
                 return null;
             }
-        }).when(braintreeClient).getConfiguration(any(Context.class), any(ConfigurationListener.class));
+        }).when(braintreeClient).getConfiguration(any(Context.class), any(ConfigurationCallback.class));
 
         return braintreeClient;
     }

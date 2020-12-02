@@ -9,10 +9,8 @@ import android.os.Bundle;
 import androidx.fragment.app.FragmentActivity;
 
 import com.braintreepayments.api.exceptions.BraintreeException;
-import com.braintreepayments.api.exceptions.GoogleApiClientException;
 import com.braintreepayments.api.exceptions.InvalidArgumentException;
 import com.braintreepayments.api.googlepayment.R;
-import com.braintreepayments.api.interfaces.TokenizationParametersListener;
 import com.braintreepayments.api.models.Authorization;
 import com.braintreepayments.api.models.BraintreeRequestCodes;
 import com.braintreepayments.api.models.Configuration;
@@ -51,7 +49,6 @@ import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricTestRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import static android.app.Activity.RESULT_CANCELED;
