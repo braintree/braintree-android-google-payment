@@ -80,7 +80,6 @@ public class GooglePaymentClientUnitTest {
 
     private FragmentActivity activity;
     private BraintreeClient braintreeClient;
-    private Configuration configuration;
 
     private GooglePaymentRequest baseRequest;
 
@@ -89,8 +88,6 @@ public class GooglePaymentClientUnitTest {
     private GooglePaymentOnActivityResultCallback activityResultCallback;
 
     private ActivityInfo activityInfo;
-
-    private static String googlePaymentModuleVersion = com.braintreepayments.api.googlepayment.BuildConfig.VERSION_NAME;
 
     @Before
     public void beforeEach() throws JSONException {
@@ -114,8 +111,7 @@ public class GooglePaymentClientUnitTest {
                         .enabled(true))
                 .build();
 
-        configuration = Configuration.fromJson(configString);
-
+        Configuration configuration = Configuration.fromJson(configString);
 
         braintreeClient = new MockBraintreeClientBuilder()
                 .configuration(configuration)
@@ -145,27 +141,8 @@ public class GooglePaymentClientUnitTest {
         verify(mockPaymentsClient).isReadyToPay(captor.capture());
         String actualJson = captor.getValue().toJson();
 
-        String expectedJson = "{\n" +
-                "  \"apiVersion\": 2,\n" +
-                "  \"apiVersionMinor\": 0,\n" +
-                "  \"allowedPaymentMethods\": [\n" +
-                "    {\n" +
-                "      \"type\": \"CARD\",\n" +
-                "      \"parameters\": {\n" +
-                "        \"allowedAuthMethods\": [\n" +
-                "          \"PAN_ONLY\",\n" +
-                "          \"CRYPTOGRAM_3DS\"\n" +
-                "        ],\n" +
-                "        \"allowedCardNetworks\": [\n" +
-                "          \"AMEX\",\n" +
-                "          \"VISA\"\n" +
-                "        ]\n" +
-                "      }\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}";
-
-        JSONAssert.assertEquals(expectedJson, actualJson, false);
+        JSONAssert.assertEquals(
+                Fixtures.READY_TO_PAY_REQUEST_WITHOUT_EXISTING_PAYMENT_METHOD, actualJson, false);
     }
 
     @Test
@@ -185,28 +162,8 @@ public class GooglePaymentClientUnitTest {
         verify(mockPaymentsClient).isReadyToPay(captor.capture());
         String actualJson = captor.getValue().toJson();
 
-        String expectedJson = "{\n" +
-                "  \"apiVersion\": 2,\n" +
-                "  \"apiVersionMinor\": 0,\n" +
-                "  \"allowedPaymentMethods\": [\n" +
-                "    {\n" +
-                "      \"type\": \"CARD\",\n" +
-                "      \"parameters\": {\n" +
-                "        \"allowedAuthMethods\": [\n" +
-                "          \"PAN_ONLY\",\n" +
-                "          \"CRYPTOGRAM_3DS\"\n" +
-                "        ],\n" +
-                "        \"allowedCardNetworks\": [\n" +
-                "          \"AMEX\",\n" +
-                "          \"VISA\"\n" +
-                "        ]\n" +
-                "      }\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"existingPaymentMethodRequired\": true\n" +
-                "}";
-
-        JSONAssert.assertEquals(expectedJson, actualJson, false);
+        JSONAssert.assertEquals(
+                Fixtures.READY_TO_PAY_REQUEST_WITH_EXISTING_PAYMENT_METHOD, actualJson, false);
     }
 
     @Test
@@ -367,6 +324,8 @@ public class GooglePaymentClientUnitTest {
         JSONObject paypalTokenizationSpecificationParams = paypalTokenizationSpecification.getJSONObject("parameters");
         assertEquals("braintree", paypalTokenizationSpecificationParams.getString("gateway"));
         assertEquals("v1", paypalTokenizationSpecificationParams.getString("braintree:apiVersion"));
+
+        String googlePaymentModuleVersion = com.braintreepayments.api.googlepayment.BuildConfig.VERSION_NAME;
         assertEquals(googlePaymentModuleVersion, paypalTokenizationSpecificationParams.getString("braintree:sdkVersion"));
         assertEquals("integration_merchant_id", paypalTokenizationSpecificationParams.getString("braintree:merchantId"));
         assertEquals("{\"source\":\"client\",\"version\":\"" + googlePaymentModuleVersion + "\",\"platform\":\"android\"}", paypalTokenizationSpecificationParams.getString("braintree:metadata"));
@@ -483,6 +442,7 @@ public class GooglePaymentClientUnitTest {
         JSONObject cardTokenizationSpecificationParams = tokenizationSpecification.getJSONObject("parameters");
         assertFalse(cardTokenizationSpecificationParams.has("braintree:clientKey"));
     }
+
     @Test
     public void requestPayment_sendsAnalyticsEvent() throws JSONException, InvalidArgumentException {
         String configString = new TestConfigurationBuilder()
@@ -1096,7 +1056,7 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void getAllowedCardNetworks_returnsSupportedNetworks() throws InterruptedException, JSONException, InvalidArgumentException {
+    public void getAllowedCardNetworks_returnsSupportedNetworks() throws JSONException, InvalidArgumentException {
         String configString = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
