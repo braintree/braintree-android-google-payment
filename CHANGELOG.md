@@ -3,7 +3,6 @@
 ## unreleased
 
 * Create `GooglePaymentClient`
-* Migrate GooglePayment supplemental classes that originally existed in the `braintree-android` repo into this repo.
 * Bump `compileSdkVersion` and `targetSdkVersion` to API level 30
 * Breaking Changes
   * Bump `minSdkVersion` to 21.
