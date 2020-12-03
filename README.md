@@ -31,11 +31,6 @@ Here are a few ways to get in touch:
 * [Braintree Support](https://articles.braintreepayments.com/) / [support@braintreepayments.com](mailto:support@braintreepayments.com) -
 for personal support at any phase of integration
 
-## Releases
-
-Subscribe to our [Google Group](https://groups.google.com/forum/#!forum/braintree-sdk-announce) to
-be notified when SDK releases go out.
-
 ## License
 
 Braintree Android Google Payment is open source and available under the MIT license. See the [LICENSE](LICENSE) file for more info.
