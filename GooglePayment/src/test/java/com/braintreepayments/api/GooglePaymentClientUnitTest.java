@@ -519,7 +519,7 @@ public class GooglePaymentClientUnitTest {
         ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
         verify(requestPaymentCallback).onResult(eq(false), captor.capture());
         assertTrue(captor.getValue() instanceof BraintreeException);
-        assertEquals("Google Pay enabled is not enabled for your Braintree account, or Google Play Services are not configured correctly.",
+        assertEquals("Google Pay is not enabled for your Braintree account, or Google Play Services are not configured correctly.",
                 captor.getValue().getMessage());
     }
 
