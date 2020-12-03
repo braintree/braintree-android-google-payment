@@ -90,7 +90,7 @@ public class GooglePaymentClientUnitTest {
     private ActivityInfo activityInfo;
 
     @Before
-    public void beforeEach() throws JSONException {
+    public void beforeEach() {
         activity = mock(FragmentActivity.class);
         braintreeClient = mock(BraintreeClient.class);
         readyToPayCallback = mock(GooglePaymentIsReadyToPayCallback.class);
@@ -105,13 +105,11 @@ public class GooglePaymentClientUnitTest {
                         .setCurrencyCode("USD")
                         .build());
 
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .supportedNetworks(new String[]{"amex", "visa"})
                         .enabled(true))
-                .build();
-
-        Configuration configuration = Configuration.fromJson(configString);
+                .buildConfiguration();
 
         braintreeClient = new MockBraintreeClientBuilder()
                 .configuration(configuration)
@@ -174,12 +172,12 @@ public class GooglePaymentClientUnitTest {
         mockStatic(Wallet.class);
         when(Wallet.getPaymentsClient(any(Activity.class), any(Wallet.WalletOptions.class))).thenReturn(mockPaymentsClient);
 
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder().enabled(false))
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString(Fixtures.TOKENIZATION_KEY))
                 .activityInfo(activityInfo)
                 .build();
@@ -191,19 +189,19 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void isReadyToPay_whenActivityIsNull_forwardsErrorToCallback() throws JSONException, InvalidArgumentException {
+    public void isReadyToPay_whenActivityIsNull_forwardsErrorToCallback() throws InvalidArgumentException {
         PaymentsClient mockPaymentsClient = mock(PaymentsClient.class);
         when(mockPaymentsClient.isReadyToPay(any(IsReadyToPayRequest.class))).thenReturn(Tasks.forResult(true));
 
         mockStatic(Wallet.class);
         when(Wallet.getPaymentsClient(any(Activity.class), any(Wallet.WalletOptions.class))).thenReturn(mockPaymentsClient);
 
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder().enabled(true))
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString(Fixtures.TOKENIZATION_KEY))
                 .activityInfo(activityInfo)
                 .build();
@@ -222,8 +220,8 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void requestPayment_startsActivity() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void requestPayment_startsActivity() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -231,10 +229,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -249,7 +247,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_startsActivityWithOptionalValues() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -257,10 +255,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -361,17 +359,17 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_includesATokenizationKeyWhenPresent() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString(Fixtures.TOKENIZATION_KEY))
                 .activityInfo(activityInfo)
                 .build();
@@ -403,17 +401,17 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_doesNotIncludeATokenizationKeyWhenNotPresent() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString(Fixtures.BASE64_CLIENT_TOKEN))
                 .activityInfo(activityInfo)
                 .build();
@@ -444,8 +442,8 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void requestPayment_sendsAnalyticsEvent() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void requestPayment_sendsAnalyticsEvent() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -453,10 +451,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -478,8 +476,8 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void requestPayment_postsExceptionWhenTransactionInfoIsNull() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void requestPayment_postsExceptionWhenTransactionInfoIsNull() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -487,10 +485,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -507,11 +505,11 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void requestPayment_whenMerchantNotConfigured_returnsExceptionToFragment() throws JSONException {
-        String configString = new TestConfigurationBuilder().build();
+    public void requestPayment_whenMerchantNotConfigured_returnsExceptionToFragment() {
+        Configuration configuration = new TestConfigurationBuilder().buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .activityInfo(activityInfo)
                 .build();
 
@@ -527,7 +525,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_whenSandbox_setsTestEnvironment() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -535,10 +533,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -560,7 +558,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_whenProduction_setsProductionEnvironment() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("production")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -568,10 +566,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -593,7 +591,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_withGoogleMerchantId_sendGoogleMerchantId() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -601,10 +599,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -630,7 +628,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_withGoogleMerchantName_sendGoogleMerchantName() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -638,10 +636,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -667,7 +665,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_whenGooglePayCanProcessPayPal_tokenizationPropertiesIncludePayPal() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -675,10 +673,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -702,7 +700,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_whenPayPalDisabledByRequest_tokenizationPropertiesLackPayPal() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -710,10 +708,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -736,7 +734,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_whenPayPalDisabledInConfigurationAndGooglePayHasPayPalClientId_tokenizationPropertiesContainPayPal() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -746,10 +744,10 @@ public class GooglePaymentClientUnitTest {
                 .paypalEnabled(false)
                 .paypal(new TestConfigurationBuilder.TestPayPalConfigurationBuilder(false))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -773,7 +771,7 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_usesGooglePaymentConfigurationClientId() throws JSONException, InvalidArgumentException {
-         String configString = new TestConfigurationBuilder()
+         Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -783,10 +781,10 @@ public class GooglePaymentClientUnitTest {
                  .paypal(new TestConfigurationBuilder.TestPayPalConfigurationBuilder(true)
                          .clientId("paypal-client-id-for-paypal"))
                  .withAnalytics()
-                 .build();
+                 .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -819,17 +817,17 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void requestPayment_whenGooglePaymentConfigurationLacksClientId_tokenizationPropertiesLackPayPal() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -852,10 +850,10 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void tokenize_withCardToken_returnsGooglePaymentNonce() throws JSONException, InvalidArgumentException {
+    public void tokenize_withCardToken_returnsGooglePaymentNonce() throws InvalidArgumentException {
         String paymentDataJson = Fixtures.RESPONSE_GOOGLE_PAYMENT_CARD;
 
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -863,10 +861,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -884,10 +882,10 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void tokenize_withPayPalToken_returnsPayPalAccountNonce() throws JSONException, InvalidArgumentException {
+    public void tokenize_withPayPalToken_returnsPayPalAccountNonce() throws InvalidArgumentException {
         String paymentDataJson = Fixtures.PAYMENT_METHODS_PAYPAL_ACCOUNT_RESPONSE;
 
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -895,10 +893,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -916,8 +914,8 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void requestPayment_whenRequestIsNull_fowardsExceptionToCallback() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void requestPayment_whenRequestIsNull_fowardsExceptionToCallback() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -925,10 +923,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -947,8 +945,8 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void requestPayment_whenManifestInvalid_fowardsExceptionToCallback() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void requestPayment_whenManifestInvalid_fowardsExceptionToCallback() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -956,10 +954,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(null)
                 .build();
@@ -981,8 +979,8 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void onActivityResult_sendsAnalyticsEventOnCancel() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void onActivityResult_sendsAnalyticsEventOnCancel() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -990,10 +988,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -1006,8 +1004,8 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void onActivityResult_sendsAnalyticsEventOnNonOkOrCanceledResult() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void onActivityResult_sendsAnalyticsEventOnNonOkOrCanceledResult() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -1015,10 +1013,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -1031,8 +1029,8 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void onActivityResult_sendsAnalyticsEventOnOkResponse() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void onActivityResult_sendsAnalyticsEventOnOkResponse() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .environment("sandbox")
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
@@ -1040,10 +1038,10 @@ public class GooglePaymentClientUnitTest {
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"})
                         .enabled(true))
                 .withAnalytics()
-                .build();
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
-                .configuration(Configuration.fromJson(configString))
+                .configuration(configuration)
                 .authorization(Authorization.fromString("sandbox_tokenization_string"))
                 .activityInfo(activityInfo)
                 .build();
@@ -1056,14 +1054,12 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void getAllowedCardNetworks_returnsSupportedNetworks() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void getAllowedCardNetworks_returnsSupportedNetworks() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
-                .build();
-
-        Configuration configuration = Configuration.fromJson(configString);
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
                 .configuration(configuration)
@@ -1084,14 +1080,12 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void getTokenizationParameters_returnsCorrectParameters() throws Exception {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
                 .withAnalytics()
-                .build();
-
-        Configuration configuration = Configuration.fromJson(configString);
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
                 .configuration(configuration)
@@ -1112,15 +1106,13 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void getTokenizationParameters_doesNotIncludeATokenizationKeyWhenNotPresent() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void getTokenizationParameters_doesNotIncludeATokenizationKeyWhenNotPresent() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
                 .withAnalytics()
-                .build();
-
-        Configuration configuration = Configuration.fromJson(configString);
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
                 .configuration(configuration)
@@ -1136,14 +1128,12 @@ public class GooglePaymentClientUnitTest {
 
     @Test
     public void getTokenizationParameters_includesATokenizationKeyWhenPresent() throws Exception {
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
                 .withAnalytics()
-                .build();
-
-        Configuration configuration = Configuration.fromJson(configString);
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
                 .configuration(configuration)
@@ -1158,15 +1148,13 @@ public class GooglePaymentClientUnitTest {
     }
 
     @Test
-    public void getTokenizationParameters_forwardsParametersAndAllowedCardsToCallback() throws JSONException, InvalidArgumentException {
-        String configString = new TestConfigurationBuilder()
+    public void getTokenizationParameters_forwardsParametersAndAllowedCardsToCallback() throws InvalidArgumentException {
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .googleAuthorizationFingerprint("google-auth-fingerprint")
                         .supportedNetworks(new String[]{"visa", "mastercard", "amex", "discover"}))
                 .withAnalytics()
-                .build();
-
-        Configuration configuration = Configuration.fromJson(configString);
+                .buildConfiguration();
 
         BraintreeClient braintreeClient = new MockBraintreeClientBuilder()
                 .configuration(configuration)

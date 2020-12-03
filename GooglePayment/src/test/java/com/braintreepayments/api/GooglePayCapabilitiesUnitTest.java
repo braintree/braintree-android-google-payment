@@ -38,12 +38,10 @@ public class GooglePayCapabilitiesUnitTest {
     public void isGooglePayEnabled_whenConfigurationEnabledAndApiAvailable_returnsTrue() throws JSONException {
         FragmentActivity activity = mock(FragmentActivity.class);
 
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .enabled(true))
-                .build();
-
-        Configuration configuration = Configuration.fromJson(configString);
+                .buildConfiguration();
 
         GoogleApiAvailability mockGoogleApiAvailability = mock(GoogleApiAvailability.class);
         when(mockGoogleApiAvailability.isGooglePlayServicesAvailable(any(Context.class))).thenReturn(ConnectionResult.SUCCESS);
@@ -58,12 +56,10 @@ public class GooglePayCapabilitiesUnitTest {
     public void isGooglePayEnabled_whenConfigurationNotEnabled_returnsFalse() throws JSONException {
         FragmentActivity activity = mock(FragmentActivity.class);
 
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .enabled(false))
-                .build();
-
-        Configuration configuration = Configuration.fromJson(configString);
+                .buildConfiguration();
 
         GoogleApiAvailability mockGoogleApiAvailability = mock(GoogleApiAvailability.class);
         when(mockGoogleApiAvailability.isGooglePlayServicesAvailable(any(Context.class))).thenReturn(ConnectionResult.SUCCESS);
@@ -78,12 +74,10 @@ public class GooglePayCapabilitiesUnitTest {
     public void isGooglePayEnabled_whenApiNotAvailable_returnsFalse() throws JSONException {
         FragmentActivity activity = mock(FragmentActivity.class);
 
-        String configString = new TestConfigurationBuilder()
+        Configuration configuration = new TestConfigurationBuilder()
                 .googlePayment(new TestConfigurationBuilder.TestGooglePaymentConfigurationBuilder()
                         .enabled(true))
-                .build();
-
-        Configuration configuration = Configuration.fromJson(configString);
+                .buildConfiguration();
 
         GoogleApiAvailability mockGoogleApiAvailability = mock(GoogleApiAvailability.class);
         when(mockGoogleApiAvailability.isGooglePlayServicesAvailable(any(Context.class))).thenReturn(ConnectionResult.NETWORK_ERROR);
