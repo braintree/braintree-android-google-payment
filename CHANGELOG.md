@@ -2,7 +2,6 @@
 
 ## unreleased
 
-* Create `GooglePaymentClient`
 * Bump `compileSdkVersion` and `targetSdkVersion` to API level 30
 * Breaking Changes
   * Bump `minSdkVersion` to 21.
