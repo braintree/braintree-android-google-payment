@@ -1,6 +1,5 @@
 package com.braintreepayments.api;
 
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 
 import com.braintreepayments.api.models.Authorization;
@@ -39,19 +38,19 @@ public class MockBraintreeClientBuilder {
     public BraintreeClient build() {
         BraintreeClient braintreeClient = mock(BraintreeClient.class);
         when(braintreeClient.getAuthorization()).thenReturn(authorization);
-        when(braintreeClient.isUrlSchemeDeclaredInAndroidManifest(any(Context.class), anyString(), any(Class.class))).thenReturn(true);
-        when(braintreeClient.getManifestActivityInfo(any(Context.class), any(Class.class))).thenReturn(activityInfo);
+        when(braintreeClient.isUrlSchemeDeclaredInAndroidManifest(anyString(), any(Class.class))).thenReturn(true);
+        when(braintreeClient.getManifestActivityInfo(any(Class.class))).thenReturn(activityInfo);
 
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) {
-                ConfigurationCallback callback = (ConfigurationCallback) invocation.getArguments()[1];
+                ConfigurationCallback callback = (ConfigurationCallback) invocation.getArguments()[0];
                 if (configuration != null) {
                     callback.onResult(configuration, null);
                 }
                 return null;
             }
-        }).when(braintreeClient).getConfiguration(any(Context.class), any(ConfigurationCallback.class));
+        }).when(braintreeClient).getConfiguration(any(ConfigurationCallback.class));
 
         return braintreeClient;
     }

@@ -471,8 +471,8 @@ public class GooglePaymentClientUnitTest {
         sut.requestPayment(activity, googlePaymentRequest, requestPaymentCallback);
 
         InOrder order = inOrder(braintreeClient);
-        order.verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.selected"));
-        order.verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.started"));
+        order.verify(braintreeClient).sendAnalyticsEvent(eq("google-payment.selected"));
+        order.verify(braintreeClient).sendAnalyticsEvent(eq("google-payment.started"));
     }
 
     @Test
@@ -500,8 +500,8 @@ public class GooglePaymentClientUnitTest {
         sut.requestPayment(activity, googlePaymentRequest, requestPaymentCallback);
 
         InOrder order = inOrder(braintreeClient);
-        order.verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.selected"));
-        order.verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.failed"));
+        order.verify(braintreeClient).sendAnalyticsEvent(eq("google-payment.selected"));
+        order.verify(braintreeClient).sendAnalyticsEvent(eq("google-payment.failed"));
     }
 
     @Test
@@ -935,7 +935,7 @@ public class GooglePaymentClientUnitTest {
 
         sut.requestPayment(activity, null, requestPaymentCallback);
 
-        verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.failed"));
+        verify(braintreeClient).sendAnalyticsEvent(eq("google-payment.failed"));
         ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
         verify(requestPaymentCallback).onResult(eq(false), captor.capture());
 
@@ -968,7 +968,7 @@ public class GooglePaymentClientUnitTest {
         FragmentActivity activity = mock(FragmentActivity.class);
         sut.requestPayment(activity, googlePaymentRequest, requestPaymentCallback);
 
-        verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.failed"));
+        verify(braintreeClient).sendAnalyticsEvent(eq("google-payment.failed"));
         ArgumentCaptor<Exception> captor = ArgumentCaptor.forClass(Exception.class);
         verify(requestPaymentCallback).onResult(eq(false), captor.capture());
 
@@ -1000,7 +1000,7 @@ public class GooglePaymentClientUnitTest {
 
         sut.onActivityResult(activity, RESULT_CANCELED, new Intent(), activityResultCallback);
 
-        verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.canceled"));
+        verify(braintreeClient).sendAnalyticsEvent(eq("google-payment.canceled"));
     }
 
     @Test
@@ -1025,7 +1025,7 @@ public class GooglePaymentClientUnitTest {
 
         sut.onActivityResult(activity, RESULT_FIRST_USER, new Intent(), activityResultCallback);
 
-        verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.failed"));
+        verify(braintreeClient).sendAnalyticsEvent(eq("google-payment.failed"));
     }
 
     @Test
@@ -1050,7 +1050,7 @@ public class GooglePaymentClientUnitTest {
 
         sut.onActivityResult(activity, RESULT_OK, new Intent(), activityResultCallback);
 
-        verify(braintreeClient).sendAnalyticsEvent(same(activity), eq("google-payment.authorized"));
+        verify(braintreeClient).sendAnalyticsEvent(eq("google-payment.authorized"));
     }
 
     @Test

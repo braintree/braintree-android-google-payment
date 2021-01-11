@@ -101,7 +101,7 @@ public class GooglePaymentClient {
             return;
         }
 
-        braintreeClient.getConfiguration(activity, new ConfigurationCallback() {
+        braintreeClient.getConfiguration(new ConfigurationCallback() {
             @Override
             public void onResult(@Nullable Configuration configuration, @Nullable Exception e) {
                 if (!configuration.getGooglePayment().isEnabled()) {
@@ -171,7 +171,7 @@ public class GooglePaymentClient {
      *                 {@link PaymentMethodTokenizationParameters}.
      */
     public void getTokenizationParameters(final FragmentActivity activity, final GooglePaymentGetTokenizationParametersCallback callback) {
-        braintreeClient.getConfiguration(activity, new ConfigurationCallback() {
+        braintreeClient.getConfiguration(new ConfigurationCallback() {
             @Override
             public void onResult(@Nullable Configuration configuration, @Nullable Exception e) {
                 callback.onResult(getTokenizationParameters(activity, configuration), getAllowedCardNetworks(configuration));
@@ -187,28 +187,28 @@ public class GooglePaymentClient {
      * @param callback Instance of {@link GooglePaymentRequestPaymentCallback} to receive the result.
      */
     public void requestPayment(final FragmentActivity activity, final GooglePaymentRequest request, final GooglePaymentRequestPaymentCallback callback) {
-        braintreeClient.sendAnalyticsEvent(activity, "google-payment.selected");
+        braintreeClient.sendAnalyticsEvent("google-payment.selected");
 
         if (!validateManifest(activity)) {
             callback.onResult(false, new BraintreeException("GooglePaymentActivity was not found in the Android " +
                     "manifest, or did not have a theme of R.style.bt_transparent_activity"));
-            braintreeClient.sendAnalyticsEvent(activity, "google-payment.failed");
+            braintreeClient.sendAnalyticsEvent("google-payment.failed");
             return;
         }
 
         if (request == null) {
             callback.onResult(false, new BraintreeException("Cannot pass null GooglePaymentRequest to requestPayment"));
-            braintreeClient.sendAnalyticsEvent(activity, "google-payment.failed");
+            braintreeClient.sendAnalyticsEvent("google-payment.failed");
             return;
         }
 
         if (request.getTransactionInfo() == null) {
             callback.onResult(false, new BraintreeException("Cannot pass null TransactionInfo to requestPayment"));
-            braintreeClient.sendAnalyticsEvent(activity, "google-payment.failed");
+            braintreeClient.sendAnalyticsEvent("google-payment.failed");
             return;
         }
 
-        braintreeClient.getConfiguration(activity, new ConfigurationCallback() {
+        braintreeClient.getConfiguration(new ConfigurationCallback() {
             @Override
             public void onResult(@Nullable Configuration configuration, @Nullable Exception e) {
                 if (!configuration.getGooglePayment().isEnabled()) {
@@ -219,7 +219,7 @@ public class GooglePaymentClient {
 
                 setGooglePaymentRequestDefaults(activity, configuration, request);
 
-                braintreeClient.sendAnalyticsEvent(activity, "google-payment.started");
+                braintreeClient.sendAnalyticsEvent("google-payment.started");
 
                 PaymentDataRequest paymentDataRequest = PaymentDataRequest.fromJson(request.toJson());
                 Intent intent = new Intent(activity, GooglePaymentActivity.class)
@@ -244,9 +244,9 @@ public class GooglePaymentClient {
     public void tokenize(FragmentActivity activity, PaymentData paymentData, GooglePaymentOnActivityResultCallback callback) {
         try {
             callback.onResult(PaymentMethodNonceFactory.fromString(paymentData.toJson()), null);
-            braintreeClient.sendAnalyticsEvent(activity, "google-payment.nonce-received");
+            braintreeClient.sendAnalyticsEvent("google-payment.nonce-received");
         } catch (JSONException | NullPointerException e) {
-            braintreeClient.sendAnalyticsEvent(activity, "google-payment.failed");
+            braintreeClient.sendAnalyticsEvent("google-payment.failed");
 
             try {
                 String token = new JSONObject(paymentData.toJson())
@@ -262,16 +262,16 @@ public class GooglePaymentClient {
 
     void onActivityResult(FragmentActivity activity, int resultCode, Intent data, final GooglePaymentOnActivityResultCallback callback) {
         if (resultCode == AppCompatActivity.RESULT_OK) {
-            braintreeClient.sendAnalyticsEvent(activity, "google-payment.authorized");
+            braintreeClient.sendAnalyticsEvent("google-payment.authorized");
             tokenize(activity, PaymentData.getFromIntent(data), callback);
         } else if (resultCode == AutoResolveHelper.RESULT_ERROR) {
-            braintreeClient.sendAnalyticsEvent(activity, "google-payment.failed");
+            braintreeClient.sendAnalyticsEvent("google-payment.failed");
 
             callback.onResult(null, new GooglePaymentException("An error was encountered during the Google Payments " +
                     "flow. See the status object in this exception for more details.",
                     AutoResolveHelper.getStatusFromIntent(data)));
         } else if (resultCode == AppCompatActivity.RESULT_CANCELED) {
-            braintreeClient.sendAnalyticsEvent(activity, "google-payment.canceled");
+            braintreeClient.sendAnalyticsEvent("google-payment.canceled");
         }
     }
 
@@ -287,7 +287,7 @@ public class GooglePaymentClient {
         String version;
 
         JSONObject metadata = new MetadataBuilder()
-                .integration(braintreeClient.getIntegrationType(activity))
+                .integration(braintreeClient.getIntegrationType())
                 .sessionId(braintreeClient.getSessionId())
                 .version()
                 .build();
@@ -437,7 +437,7 @@ public class GooglePaymentClient {
                     .put("braintree:merchantId", configuration.getMerchantId())
                     .put("braintree:metadata", (new JSONObject()
                             .put("source", "client")
-                            .put("integration", braintreeClient.getIntegrationType(activity))
+                            .put("integration", braintreeClient.getIntegrationType())
                             .put("sessionId", braintreeClient.getSessionId())
                             .put("version", googlePaymentVersion)
                             .put("platform", "android")).toString());
@@ -478,7 +478,7 @@ public class GooglePaymentClient {
                             .put("braintree:paypalClientId", configuration.getGooglePayment().getPaypalClientId())
                             .put("braintree:metadata", (new JSONObject()
                                     .put("source", "client")
-                                    .put("integration", braintreeClient.getIntegrationType(activity))
+                                    .put("integration", braintreeClient.getIntegrationType())
                                     .put("sessionId", braintreeClient.getSessionId())
                                     .put("version", googlePaymentVersion)
                                     .put("platform", "android")).toString()));
@@ -545,7 +545,7 @@ public class GooglePaymentClient {
     }
 
     private boolean validateManifest(Context context) {
-        ActivityInfo activityInfo = braintreeClient.getManifestActivityInfo(context, GooglePaymentActivity.class);
+        ActivityInfo activityInfo = braintreeClient.getManifestActivityInfo(GooglePaymentActivity.class);
         return activityInfo != null && activityInfo.getThemeResource() == R.style.bt_transparent_activity;
     }
 }
