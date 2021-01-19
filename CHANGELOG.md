@@ -3,7 +3,7 @@
 ## unreleased
 
 * Bump `compileSdkVersion` and `targetSdkVersion` to API level 30
-* Add `setCountryCode()` to `GooglePaymentRequest`
+* Add `setCountryCode` to `GooglePaymentRequest`
 * Breaking Changes
   * Bump `minSdkVersion` to 21.
 
