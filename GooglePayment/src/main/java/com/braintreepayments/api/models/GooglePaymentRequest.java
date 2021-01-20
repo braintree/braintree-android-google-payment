@@ -40,6 +40,7 @@ public class GooglePaymentRequest implements Parcelable {
     private String mEnvironment;
     private String mGoogleMerchantId;
     private String mGoogleMerchantName;
+    private String mCountryCode;
 
     public GooglePaymentRequest() {
     }
@@ -214,6 +215,17 @@ public class GooglePaymentRequest implements Parcelable {
     }
 
     /**
+     * ISO 3166-1 alpha-2 country code where the transaction is processed. This is required for
+     * merchants based in European Economic Area (EEA) countries.
+     * @param countryCode
+     * @return {@link GooglePaymentRequest}
+     */
+    public GooglePaymentRequest setCountryCode(String countryCode) {
+        mCountryCode = countryCode;
+        return this;
+    }
+
+    /**
      * Assemble all declared parts of a GooglePaymentRequest to a JSON string
      * for use in making requests against Google
      * @return String
@@ -245,6 +257,10 @@ public class GooglePaymentRequest implements Parcelable {
                     .put("totalPriceStatus", totalPriceStatus)
                     .put("totalPrice", transactionInfo.getTotalPrice())
                     .put("currencyCode", transactionInfo.getCurrencyCode());
+
+            if (mCountryCode != null) {
+                transactionInfoJson.put("countryCode", mCountryCode);
+            }
 
         } catch (JSONException ignored) {
         }
