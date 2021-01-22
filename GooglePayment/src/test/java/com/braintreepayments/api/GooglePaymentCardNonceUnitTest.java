@@ -1,9 +1,10 @@
-package com.braintreepayments.api.models;
+package com.braintreepayments.api;
 
 import android.os.Parcel;
 
+import com.braintreepayments.api.GooglePaymentCardNonce;
 import com.braintreepayments.api.Json;
-import com.braintreepayments.api.test.Fixtures;
+import com.braintreepayments.api.Fixtures;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import static com.braintreepayments.api.test.Assertions.assertBinDataEqual;
+import static com.braintreepayments.api.Assertions.assertBinDataEqual;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
