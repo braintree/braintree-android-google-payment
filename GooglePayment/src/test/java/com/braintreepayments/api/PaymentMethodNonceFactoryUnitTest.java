@@ -1,8 +1,5 @@
 package com.braintreepayments.api;
 
-import com.braintreepayments.api.models.PayPalAccountNonce;
-import com.braintreepayments.api.models.PaymentMethodNonce;
-
 import org.json.JSONException;
 import org.junit.Test;
 import org.junit.runner.RunWith;

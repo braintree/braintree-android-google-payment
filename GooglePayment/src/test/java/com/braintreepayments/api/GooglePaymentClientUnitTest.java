@@ -8,14 +8,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.FragmentActivity;
 
-import com.braintreepayments.api.exceptions.BraintreeException;
-import com.braintreepayments.api.exceptions.InvalidArgumentException;
 import com.braintreepayments.api.googlepayment.R;
-import com.braintreepayments.api.models.Authorization;
-import com.braintreepayments.api.models.BraintreeRequestCodes;
-import com.braintreepayments.api.models.Configuration;
-import com.braintreepayments.api.models.PayPalAccountNonce;
-import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.Tasks;

@@ -1,6 +1,5 @@
 package com.braintreepayments.api;
 
-import com.braintreepayments.api.models.BinData;
 
 import static org.junit.Assert.assertEquals;
 
