@@ -13,6 +13,11 @@ task :unit_tests => :lint do
   sh "./gradlew --continue test"
 end
 
+desc "Interactive release to publish new version to maven local"
+task :release_local do
+  sh "./gradlew clean publishToMavenLocal"
+end
+
 desc "Interactive release to publish new version"
 task :release => :unit_tests do
   Rake::Task["assumptions"].invoke

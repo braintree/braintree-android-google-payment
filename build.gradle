@@ -1,4 +1,5 @@
 buildscript {
+    ext.kotlin_version = '1.4.20'
     repositories {
         google()
         jcenter()
@@ -10,27 +11,29 @@ buildscript {
         classpath 'com.android.tools.build:gradle:4.0.1'
         classpath 'de.marcphilipp.gradle:nexus-publish-plugin:0.4.0'
         classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
     id 'io.codearte.nexus-staging' version '0.21.2'
+    id 'de.marcphilipp.nexus-publish' version '0.4.0' apply false
 }
 
-version = '3.3.2-SNAPSHOT'
+version = '4.0.0-SNAPSHOT'
 ext {
     compileSdkVersion = 30
     minSdkVersion = 21
     targetSdkVersion = 30
     versionCode = 11
     versionName = version
-    braintreeVersion = '3.14.1'
 }
 
 allprojects {
     repositories {
-        jcenter()
+        mavenLocal()
         google()
+        jcenter()
     }
 }
 

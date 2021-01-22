@@ -5,6 +5,7 @@
 * Bump `compileSdkVersion` and `targetSdkVersion` to API level 30
 * Breaking Changes
   * Bump `minSdkVersion` to 21.
+  * Replace `GooglePayment` with `GooglePaymentClient`
 
 ## 3.3.1
 
@@ -53,4 +54,3 @@
 * Enable Google Payment as a separate and independently versioned moduled from Braintree Android
 * Supports Google Pay v1
 * Represents Google Payment as it was in Braintree Android version 2.18.1
-
