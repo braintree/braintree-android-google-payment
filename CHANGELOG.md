@@ -1,6 +1,6 @@
 # Braintree Android Google Pay SDK Release Notes
 
-## unreleased
+## 3.4.0
 
 * Bump `compileSdkVersion` and `targetSdkVersion` to API level 30
 * Add `setCountryCode` to `GooglePaymentRequest`
