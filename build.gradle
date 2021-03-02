@@ -17,12 +17,12 @@ plugins {
     id 'io.codearte.nexus-staging' version '0.21.2'
 }
 
-version '3.4.0'
+version '3.4.1-SNAPSHOT'
 ext {
     compileSdkVersion = 30
     minSdkVersion = 16
     targetSdkVersion = 30
-    versionCode = 11
+    versionCode = 12
     versionName = version
     braintreeVersion = '3.7.0'
 }
