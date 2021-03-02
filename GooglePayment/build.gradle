@@ -106,7 +106,7 @@ afterEvaluate {
 
                 pom {
                     name = 'google-payment'
-                    packaging = 'jar'
+                    packaging = 'aar'
                     description = 'Google Pay Module for Braintree\'s Android SDK.'
                     url = 'https://github.com/braintree/braintree-android-google-payment'
 
