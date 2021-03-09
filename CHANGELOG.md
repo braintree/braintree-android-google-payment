@@ -1,5 +1,9 @@
 # Braintree Android Google Pay SDK Release Notes
 
+## unreleased
+
+* Add support for Elo cards. 
+
 ## 3.4.0
 
 * Bump `compileSdkVersion` and `targetSdkVersion` to API level 30
