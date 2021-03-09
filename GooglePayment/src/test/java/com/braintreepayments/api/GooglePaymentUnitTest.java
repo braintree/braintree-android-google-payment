@@ -31,6 +31,7 @@ import com.google.android.gms.wallet.PaymentsClient;
 import com.google.android.gms.wallet.TransactionInfo;
 import com.google.android.gms.wallet.Wallet;
 import com.google.android.gms.wallet.WalletConstants;
+import com.google.common.collect.Collections2;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +46,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.rule.PowerMockRule;
 import org.robolectric.RobolectricTestRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
+
+import java.util.Collections;
 
 import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_ENVIRONMENT;
 import static com.braintreepayments.api.GooglePaymentActivity.EXTRA_PAYMENT_DATA_REQUEST;
@@ -403,6 +406,30 @@ public class GooglePaymentUnitTest {
                 .getString("type"));
 
         assertFalse(allowedPaymentMethods.toString().contains("paypal-client-id-for-google-payment"));
+    }
+
+    @Test
+    public void requestPayment_whenConfigurationContainsElo_addsEloAndEloDebitToAllowedPaymentMethods() throws JSONException {
+        TestConfigurationBuilder configuration = new TestConfigurationBuilder()
+                .googlePayment(new TestGooglePaymentConfigurationBuilder()
+                        .environment("sandbox")
+                        .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .supportedNetworks(new String[]{"elo"})
+                        .enabled(true))
+                .withAnalytics();
+
+        BraintreeFragment fragment = getSetupFragment(configuration);
+        GooglePayment.requestPayment(fragment, mBaseRequest);
+
+        JSONArray allowedCardNetworks = getPaymentDataRequestJsonSentToGooglePayment(fragment)
+                .getJSONArray("allowedPaymentMethods")
+                .getJSONObject(0)
+                .getJSONObject("parameters")
+                .getJSONArray("allowedCardNetworks");
+
+        assertEquals(2, allowedCardNetworks.length());
+        assertEquals("ELO", allowedCardNetworks.getString(0));
+        assertEquals("ELO_DEBIT", allowedCardNetworks.getString(1));
     }
 
     @Test
