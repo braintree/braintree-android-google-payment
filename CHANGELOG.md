@@ -1,6 +1,6 @@
 # Braintree Android Google Pay SDK Release Notes
 
-## unreleased
+## 3.5.0
 
 * Add support for Elo cards. 
 
