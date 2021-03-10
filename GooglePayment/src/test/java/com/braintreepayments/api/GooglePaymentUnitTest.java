@@ -406,6 +406,30 @@ public class GooglePaymentUnitTest {
     }
 
     @Test
+    public void requestPayment_whenConfigurationContainsElo_addsEloAndEloDebitToAllowedPaymentMethods() throws JSONException {
+        TestConfigurationBuilder configuration = new TestConfigurationBuilder()
+                .googlePayment(new TestGooglePaymentConfigurationBuilder()
+                        .environment("sandbox")
+                        .googleAuthorizationFingerprint("google-auth-fingerprint")
+                        .supportedNetworks(new String[]{"elo"})
+                        .enabled(true))
+                .withAnalytics();
+
+        BraintreeFragment fragment = getSetupFragment(configuration);
+        GooglePayment.requestPayment(fragment, mBaseRequest);
+
+        JSONArray allowedCardNetworks = getPaymentDataRequestJsonSentToGooglePayment(fragment)
+                .getJSONArray("allowedPaymentMethods")
+                .getJSONObject(0)
+                .getJSONObject("parameters")
+                .getJSONArray("allowedCardNetworks");
+
+        assertEquals(2, allowedCardNetworks.length());
+        assertEquals("ELO", allowedCardNetworks.getString(0));
+        assertEquals("ELO_DEBIT", allowedCardNetworks.getString(1));
+    }
+
+    @Test
     public void tokenize_withCardToken_returnsGooglePaymentNonce() {
         String paymentDataJson = FixturesHelper.stringFromFixture("response/google_payment/card.json");
         BraintreeFragment fragment = getSetupFragment();
